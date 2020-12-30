@@ -1,5 +1,7 @@
 
 let socket = io();
+let mic;
+
 
 socket.on("connect", newConnection);
 
@@ -7,8 +9,14 @@ function newConnection() {
   console.log("your id:", socket.id);
 }
 
+socket.on('micvolume_in', others_micvolume);
 
-let mic;
+function others_micvolume (){
+
+
+
+
+}
 
 function preload() {
 
@@ -41,5 +49,6 @@ function draw() {
   let h = map(vol, 0, 1, height, 0);
   ellipse(width / 2, h - 25, 50, 50);
   console.log("vol " + vol);
+  socket.emit('micvolume', h);
 
 }

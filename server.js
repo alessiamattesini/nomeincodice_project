@@ -16,4 +16,11 @@ io.on('connection', newConnection);
 
 function newConnection(socket){
 	console.log('new connection:', socket.client.id);
+	socket.on('micvolume', micvolume_message);
+
+	function micvolume_message (dataReceived){
+
+		socket.broadcast.emit('micvolume_in', dataReceived);
+
+	}
 }
