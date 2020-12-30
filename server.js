@@ -15,5 +15,5 @@ let io = socket(server);
 io.on('connection', newConnection);
 
 function newConnection(socket){
-	console.log(new connection:', socket.client.id);
+	console.log('new connection:', socket.client.id);
 }
