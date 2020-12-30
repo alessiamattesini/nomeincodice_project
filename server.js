@@ -2,6 +2,8 @@ let express = require('express');
 
 let app = express();
 
+let highscore = 0;
+
 let port = process.env.PORT || 3000;
 
 let server = app.listen(port);
@@ -20,7 +22,13 @@ function newConnection(socket){
 
 	function micvolume_message (dataReceived){
 
+		highscore += dataReceived;
+
 		socket.broadcast.emit('micvolume_in', dataReceived);
+
+		io.sockets.emit('highscore', highscore);
+
+
 
 	}
 }
