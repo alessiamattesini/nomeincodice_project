@@ -3,9 +3,7 @@ let socket = io();
 let mic;
 let sum = 0;
 let totalscore = 0;
-
-
-
+let players = 0;
 
 socket.on("connect", newConnection);
 
@@ -14,18 +12,33 @@ function newConnection() {
 
 }
 
+socket.on('disconnect', function(){
+      players--;
+			console.log("disconnected", socket.client.id);
+  });
+
+
+
+socket.on("players", show_players);
+
+function show_players(n_players){
+
+  players = n_players;
+
+  console.log(players);
+
+}
+
 socket.on('micvolume_in', others_micvolume);
 
 function others_micvolume (data){
-
-sum = 0;
 
 ellipse(200, data + 25, 50,50);
 
 sum += data;
 
 // console.log("somma " + sum);
-console.log("data "+ data + " " + frameCount);
+// console.log("data "+ data + " " + frameCount);
 
 }
 
@@ -75,7 +88,8 @@ function draw() {
   socket.emit('micvolume', h);
 
   text(totalscore,100,100);
-  text(sum + h,300,100);
+  text(sum,300,100);
+
 
 
 }
