@@ -19,6 +19,7 @@ io.on('connection', newConnection);
 let players = 0;
 
 let d_player = false;
+// let id_players = [];
 
 function newConnection(socket) {
 
@@ -26,7 +27,9 @@ function newConnection(socket) {
 
   io.sockets.emit("players", players);
 
-	console.log('players:', players);
+  console.log('players:', players);
+
+
 
   console.log('new connection:', socket.client.id);
 
@@ -34,29 +37,33 @@ function newConnection(socket) {
 
   function micvolume_message(dataReceived) {
 
-    highscore += dataReceived;
+    highscore += dataReceived.h;
 
-    io.sockets.emit('micvolume_in', dataReceived);
+    io.sockets.emit('micvolume_in', dataReceived.h);
 
     io.sockets.emit('highscore', highscore);
 
-		socket.on('disconnect', function () {
-    d_player = true;
 
-}); //per capire se un giocatore si disconnette; il paramentro d_player serve
-//a mantenere in memoria il fatto che qualcuno si sia disconnesso
 
-if(d_player){
+    socket.on('disconnect', function() {
+      d_player = true;
 
-	players--;
-	console.log('players:', players);
-	d_player = false;
+    }); //per capire se un giocatore si disconnette; il paramentro d_player serve
+    //a mantenere in memoria il fatto che qualcuno si sia disconnesso
 
-	io.sockets.emit("players", players);
+    if (d_player) {
 
-} // dato che la disconnessione dura più di un tick questo if esterno
-//serve  a non decrementare "players" più di una volta per ogni disconnect
+      players--;
+      console.log('players:', players);
+      d_player = false;
 
-}
+      io.sockets.emit("players", players);
+
+    } // dato che la disconnessione dura più di un tick questo if esterno
+    //serve  a non decrementare "players" più di una volta per ogni disconnect
+
+
+  }
+
 
 }
