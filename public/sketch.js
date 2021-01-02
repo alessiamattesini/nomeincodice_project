@@ -1,4 +1,3 @@
-
 let socket = io();
 let mic;
 let sum = 0;
@@ -7,6 +6,8 @@ let players = 0;
 let id;
 let prec_totalscore = 0;
 let timer = 0;
+let otherX_players;
+let otherH_players;
 
 socket.on("connect", newConnection);
 
@@ -17,9 +18,30 @@ function newConnection() {
 }
 
 
+socket.on('micvolume_in', others_micvolume);
+
+
+function others_micvolume(data) {
+
+otherX_players = data.mouse_x;
+otherH_players = data.h;
+  // ellipse(data.mouse_x, data.h + 25, 50, 50);
+
+
+  // sum = 0;
+  //
+  // sum += data.h;
+
+  // console.log("somma " + sum);
+  // console.log("data "+ data + " " + frameCount);
+
+}
+
+
+
 socket.on("players", show_players);
 
-function show_players(n_players){
+function show_players(n_players) {
 
   players = n_players;
 
@@ -27,29 +49,12 @@ function show_players(n_players){
 
 }
 
-socket.on('micvolume_in', others_micvolume);
-
-
-function others_micvolume (data){
-sum = 0;
-ellipse(200, data + 25, 50,50);
-
-sum += data;
-
-
-
-// console.log("somma " + sum);
-// console.log("data "+ data + " " + frameCount);
-
-}
-
 
 socket.on('highscore', highscore);
 
-function highscore (datahighscore){
+function highscore(datahighscore) {
 
   totalscore = datahighscore;
-
 
 }
 
@@ -63,22 +68,21 @@ function setup() {
 
   frameRate(50);
 
-createCanvas(windowWidth, windowHeight);
+  createCanvas(300, 600);
 
-userStartAudio();
-// Create an Audio input
- mic = new p5.AudioIn();
+  userStartAudio();
+  // Create an Audio input
+  mic = new p5.AudioIn();
 
- // start the Audio Input.
- // By default, it does not .connect() (to the computer speakers)
- mic.start();
+  // start the Audio Input.
+  // By default, it does not .connect() (to the computer speakers)
+  mic.start();
 
 }
 
 function draw() {
 
-
-  background(200);
+  textAlign(CENTER);
 
   // Get the overall volume (between 0 and 1.0)
   let vol = mic.getLevel();
@@ -87,36 +91,47 @@ function draw() {
 
   // Draw an ellipse with height based on volume
   let h = map(vol, 0, 1, 0, height);
-  ellipse(width / 2, h + 25, 50, 50);
+
   // console.log("vol " + vol);
   // console.log("h " + h);
 
-if (millis() >= 20+timer) {
 
 
-  text(totalscore-prec_totalscore, 300, 100);
 
-  console.log(totalscore-prec_totalscore);
+  if (millis() >= 20 + timer) {
 
-  prec_totalscore = totalscore;
+    background("salmon");
 
-  timer = millis();
+    text(totalscore - prec_totalscore, width / 2, 200);
+
+    text(totalscore, width / 2, 100);
+
+    console.log(totalscore - prec_totalscore);
+
+    prec_totalscore = totalscore;
+
+
+    ellipse(mouseX, h + 25, 50, 50);
+
+    timer = millis();
 
   }
 
+ellipse(otherX_players, otherH_players + 25, 50, 50);
 
 
   let info_p = {
 
-    id : id,
-    h : h
+    id: id,
+    h: h,
+    mouse_x: mouseX
 
   }
 
 
   socket.emit('micvolume', info_p);
 
-  text(totalscore, 100, 100);
+
 
 
 

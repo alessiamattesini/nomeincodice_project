@@ -39,7 +39,7 @@ function newConnection(socket) {
 
     highscore += dataReceived.h;
 
-    io.sockets.emit('micvolume_in', dataReceived.h);
+    socket.broadcast.emit('micvolume_in', dataReceived);
 
     io.sockets.emit('highscore', highscore);
 
