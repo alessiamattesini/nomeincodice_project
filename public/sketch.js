@@ -25,7 +25,7 @@ function others_micvolume(data) {
 
 otherX_players = data.mouse_x;
 otherH_players = data.h;
-  // ellipse(data.mouse_x, data.h + 25, 50, 50);
+// ellipse(data.mouse_x, data.h + 25, 50, 50);
 
 
   // sum = 0;
@@ -106,18 +106,22 @@ function draw() {
 
     text(totalscore, width / 2, 100);
 
-    console.log(totalscore - prec_totalscore);
+    // console.log(totalscore - prec_totalscore);
 
     prec_totalscore = totalscore;
 
 
     ellipse(mouseX, h + 25, 50, 50);
 
+    ellipse(otherX_players, otherH_players + 25, 50, 50);
+    console.log(otherX_players + "  " + otherH_players);
+
     timer = millis();
 
   }
 
-ellipse(otherX_players, otherH_players + 25, 50, 50);
+
+
 
 
   let info_p = {
@@ -135,5 +139,18 @@ ellipse(otherX_players, otherH_players + 25, 50, 50);
 
 
 
+
+}
+
+
+class Player {
+
+  constructor (mouse_x, h, id){
+
+    this.mouse_x = mouse_x;
+    this.h = h;
+    this.id = id;
+
+  }
 
 }
