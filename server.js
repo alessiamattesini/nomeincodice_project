@@ -19,19 +19,37 @@ io.on('connection', newConnection);
 let players = 0;
 
 let d_player = false;
-// let id_players = [];
+
+let id_players = [];
+
+
+
+
 
 function newConnection(socket) {
 
   players++; //per ogni connessione aggiungo un giocatore
 
   io.sockets.emit("players", players);
-
   console.log('players:', players);
 
 
+  socket.on("idPlayerConnected", broadcastId);
+
+  function broadcastId(idPlayerConnected) {
+
+    console.log("id da client :  " + idPlayerConnected);
+
+    id_players.push(idPlayerConnected);
+
+    io.sockets.emit('idPlayerConnectedBroadcast', id_players);
+
+  }
+
 
   console.log('new connection:', socket.client.id);
+
+
 
   socket.on('micvolume', micvolume_message);
 

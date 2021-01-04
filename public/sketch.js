@@ -9,32 +9,60 @@ let timer = 0;
 let otherX_players;
 let otherH_players;
 
+let myOtherPlayers = [];
+
+
 socket.on("connect", newConnection);
 
 function newConnection() {
   console.log("your id:", socket.id);
   id = socket.id;
 
+  socket.emit('idPlayerConnected', socket.id);
+
 }
 
 
-socket.on('micvolume_in', others_micvolume);
+socket.on("idPlayerConnectedBroadcast", createOtherPlayer);
 
+function createOtherPlayer(idOtherPlayer){
+
+  for (let k = 0; k < idOtherPlayer.length; k++){
+
+    let newPlayer = new OtherPlayer (idOtherPlayer[k], 0,0);
+    myOtherPlayers.push(newPlayer);
+
+    // console.log("id da classe " +myOtherPlayers[0].id);
+
+  }
+
+}
+
+
+
+socket.on('micvolume_in', others_micvolume);
 
 function others_micvolume(data) {
 
 otherX_players = data.mouse_x;
 otherH_players = data.h;
+
+for(let i = 0; i < myOtherPlayers.length; i++){
+
+  if(data.id === myOtherPlayers[i].getID()){
+
+    myOtherPlayers[i].h = data.h;
+    myOtherPlayers[i].mouse_x = data.mouse_x;
+
+
+  }
+
+}
 // ellipse(data.mouse_x, data.h + 25, 50, 50);
-
-
   // sum = 0;
-  //
   // sum += data.h;
-
   // console.log("somma " + sum);
   // console.log("data "+ data + " " + frameCount);
-
 }
 
 
@@ -50,6 +78,7 @@ function show_players(n_players) {
 }
 
 
+
 socket.on('highscore', highscore);
 
 function highscore(datahighscore) {
@@ -61,8 +90,10 @@ function highscore(datahighscore) {
 
 
 function preload() {
-
 }
+
+
+
 
 function setup() {
 
@@ -80,6 +111,9 @@ function setup() {
 
 }
 
+
+
+
 function draw() {
 
   textAlign(CENTER);
@@ -95,9 +129,6 @@ function draw() {
   // console.log("vol " + vol);
   // console.log("h " + h);
 
-
-
-
   if (millis() >= 20 + timer) {
 
     background("salmon");
@@ -110,19 +141,23 @@ function draw() {
 
     prec_totalscore = totalscore;
 
-
     ellipse(mouseX, h + 25, 50, 50);
 
-    ellipse(otherX_players, otherH_players + 25, 50, 50);
-    console.log(otherX_players + "  " + otherH_players);
+    // ellipse(otherX_players, otherH_players + 25, 50, 50);
+    // console.log(otherX_players + "  " + otherH_players);
+
+
+    for(let j = 0; j < myOtherPlayers.length; j++){
+
+        myOtherPlayers[j].display();
+        // console.log(myOtherPlayers[j].h + "  " + myOtherPlayers[j].mouse_x);
+
+    }
+
 
     timer = millis();
 
   }
-
-
-
-
 
   let info_p = {
 
@@ -132,25 +167,42 @@ function draw() {
 
   }
 
-
   socket.emit('micvolume', info_p);
-
-
-
-
-
 
 }
 
 
-class Player {
 
-  constructor (mouse_x, h, id){
 
-    this.mouse_x = mouse_x;
-    this.h = h;
+
+class OtherPlayer {
+
+  constructor (id, mouse_x, h){
+
     this.id = id;
+    this.h = h;
+    this.mouse_x = mouse_x;
+
 
   }
+
+  display(){
+
+    push();
+    fill(127);
+    stroke(0);
+
+    ellipse(this.mouse_x, this.h + 25, 50,50);
+    pop();
+
+  }
+
+  getID(){
+
+    return this.id;
+
+  }
+
+
 
 }
