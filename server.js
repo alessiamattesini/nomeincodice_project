@@ -65,6 +65,7 @@ function newConnection(socket) {
 
     socket.on('disconnect', function() {
       d_player = true;
+      io.sockets.emit("idPlayerDisconnected", socket.id);
 
     }); //per capire se un giocatore si disconnette; il paramentro d_player serve
     //a mantenere in memoria il fatto che qualcuno si sia disconnesso
@@ -76,6 +77,8 @@ function newConnection(socket) {
       d_player = false;
 
       io.sockets.emit("players", players);
+
+
 
     } // dato che la disconnessione dura più di un tick questo if esterno
     //serve  a non decrementare "players" più di una volta per ogni disconnect

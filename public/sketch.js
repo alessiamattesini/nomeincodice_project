@@ -23,19 +23,35 @@ function newConnection() {
 }
 
 
-socket.on("idPlayerConnectedBroadcast", createOtherPlayer);
 
-function createOtherPlayer(idOtherPlayer){
+socket.on("idPlayerDisconnected", removeIdPlayersDisconnected);
 
-  for (let k = 0; k < idOtherPlayer.length; k++){
+function removeIdPlayersDisconnected(idPlayerDisconnected) {
 
-    let newPlayer = new OtherPlayer (idOtherPlayer[k], 0,0);
-    myOtherPlayers.push(newPlayer);
-
-    // console.log("id da classe " +myOtherPlayers[0].id);
-
+  for (let p = 0; p < myOtherPlayers.length; p++) {
+    if (idPlayerDisconnected === myOtherPlayers[p].getId()) {
+      myOtherPlayers.splice(p, 1);
+    }
   }
 
+}
+
+
+
+socket.on("idPlayerConnectedBroadcast", createOtherPlayer);
+
+function createOtherPlayer(idOtherPlayer) {
+
+
+  for (let k = 0; k < idOtherPlayer.length; k++) {
+
+    if (idOtherPlayer[k] !== id) {
+      let newPlayer = new OtherPlayer(idOtherPlayer[k], 0, 0);
+      myOtherPlayers.push(newPlayer);
+
+      // console.log("id da classe " +myOtherPlayers[0].id);
+    }
+  }
 }
 
 
@@ -44,21 +60,20 @@ socket.on('micvolume_in', others_micvolume);
 
 function others_micvolume(data) {
 
-otherX_players = data.mouse_x;
-otherH_players = data.h;
+  otherX_players = data.mouse_x;
+  otherH_players = data.h;
 
-for(let i = 0; i < myOtherPlayers.length; i++){
+  for (let i = 0; i < myOtherPlayers.length; i++) {
 
-  if(data.id === myOtherPlayers[i].getID()){
+    if (data.id === myOtherPlayers[i].getId()) {
 
-    myOtherPlayers[i].h = data.h;
-    myOtherPlayers[i].mouse_x = data.mouse_x;
+      myOtherPlayers[i].h = data.h;
+      myOtherPlayers[i].mouse_x = data.mouse_x;
 
+    }
 
   }
-
-}
-// ellipse(data.mouse_x, data.h + 25, 50, 50);
+  // ellipse(data.mouse_x, data.h + 25, 50, 50);
   // sum = 0;
   // sum += data.h;
   // console.log("somma " + sum);
@@ -70,11 +85,8 @@ for(let i = 0; i < myOtherPlayers.length; i++){
 socket.on("players", show_players);
 
 function show_players(n_players) {
-
   players = n_players;
-
   console.log("giocatori connessi: " + players);
-
 }
 
 
@@ -82,16 +94,11 @@ function show_players(n_players) {
 socket.on('highscore', highscore);
 
 function highscore(datahighscore) {
-
   totalscore = datahighscore;
-
 }
 
 
-
-function preload() {
-}
-
+function preload() {}
 
 
 
@@ -147,10 +154,10 @@ function draw() {
     // console.log(otherX_players + "  " + otherH_players);
 
 
-    for(let j = 0; j < myOtherPlayers.length; j++){
+    for (let j = 0; j < myOtherPlayers.length; j++) {
 
-        myOtherPlayers[j].display();
-        // console.log(myOtherPlayers[j].h + "  " + myOtherPlayers[j].mouse_x);
+      myOtherPlayers[j].display();
+      // console.log(myOtherPlayers[j].h + "  " + myOtherPlayers[j].mouse_x);
 
     }
 
@@ -172,37 +179,25 @@ function draw() {
 }
 
 
-
-
-
 class OtherPlayer {
 
-  constructor (id, mouse_x, h){
-
+  constructor(id, mouse_x, h) {
     this.id = id;
     this.h = h;
     this.mouse_x = mouse_x;
-
-
   }
 
-  display(){
-
+  display() {
     push();
     fill(127);
     stroke(0);
 
-    ellipse(this.mouse_x, this.h + 25, 50,50);
+    ellipse(this.mouse_x, this.h + 25, 50, 50);
     pop();
-
   }
 
-  getID(){
-
+  getId() {
     return this.id;
-
   }
-
-
 
 }
