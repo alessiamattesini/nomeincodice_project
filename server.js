@@ -4,7 +4,7 @@ let app = express();
 
 let highscore = 0;
 
-let port = process.env.PORT || 3000;
+let port = process.env.PORT || 80;
 
 let server = app.listen(port);
 

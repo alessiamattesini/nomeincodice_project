@@ -60,7 +60,7 @@ socket.on('micvolume_in', others_micvolume);
 
 function others_micvolume(data) {
 
-  otherX_players = data.mouse_x;
+  otherX_players = data.x;
   otherH_players = data.h;
 
   //riceve i dati info_p e li associa agli Id corrispondenti
@@ -69,12 +69,12 @@ function others_micvolume(data) {
     if (data.id === myOtherPlayers[i].getId()) {
 
       myOtherPlayers[i].h = data.h;
-      myOtherPlayers[i].mouse_x = data.mouse_x;
+      myOtherPlayers[i].x = data.x;
 
     }
 
   }
-  // ellipse(data.mouse_x, data.h + 25, 50, 50);
+  // ellipse(data.x, data.h + 25, 50, 50);
   // sum = 0;
   // sum += data.h;
   // console.log("somma " + sum);
@@ -107,7 +107,7 @@ function setup() {
 
   frameRate(50);
 
-  createCanvas(300, 600);
+  createCanvas(windowWidth, windowHeight);
 
   userStartAudio();
   // Create an Audio input
@@ -137,6 +137,11 @@ function draw() {
   // console.log("vol " + vol);
   // console.log("h " + h);
 
+  // rotazione del giroscopio
+  const widthY = map(rotationY, -90, 90, 0 , width);
+
+
+
   if (millis() >= 20 + timer) {
 
     background("salmon");
@@ -149,7 +154,7 @@ function draw() {
 
     prec_totalscore = totalscore;
 
-    ellipse(mouseX, h + 25, 50, 50);
+    ellipse(widthY, h + 25, 50, 50);
 
     // ellipse(otherX_players, otherH_players + 25, 50, 50);
     // console.log(otherX_players + "  " + otherH_players);
@@ -159,7 +164,7 @@ function draw() {
     for (let j = 0; j < myOtherPlayers.length; j++) {
 
       myOtherPlayers[j].display();
-      // console.log(myOtherPlayers[j].h + "  " + myOtherPlayers[j].mouse_x);
+      // console.log(myOtherPlayers[j].h + "  " + myOtherPlayers[j].x);
 
     }
 
@@ -171,7 +176,7 @@ function draw() {
 
     id: id,
     h: h,
-    mouse_x: mouseX
+    x: widthY
 
   }
 
@@ -182,10 +187,10 @@ function draw() {
 
 class OtherPlayer {
 
-  constructor(id, mouse_x, h) {
+  constructor(id, x, h) {
     this.id = id;
     this.h = h;
-    this.mouse_x = mouse_x;
+    this.x = x;
   }
 
   display() {
@@ -193,7 +198,7 @@ class OtherPlayer {
     fill(127);
     stroke(0);
 
-    ellipse(this.mouse_x, this.h + 25, 50, 50);
+    ellipse(this.x, this.h + 25, 50, 50);
     pop();
   }
 
@@ -202,3 +207,11 @@ class OtherPlayer {
   }
 
 }
+
+
+// ask for permissions on iOS
+function touchEnded(event) {
+  // check that those functions exist // if they exist it means we are //on iOS and we request the permissions
+   if(DeviceOrientationEvent && DeviceOrientationEvent.requestPermission){
+     DeviceOrientationEvent.requestPermission() }
+   }
