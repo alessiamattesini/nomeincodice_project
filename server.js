@@ -22,6 +22,8 @@ let d_player = false;
 
 let id_players = [];
 
+let id_player_disconnected;
+
 
 
 
@@ -36,12 +38,14 @@ function newConnection(socket) {
 
   socket.on("idPlayerConnected", broadcastId);
 
+  //riceve l'Id e lo inserisce nell'array
   function broadcastId(idPlayerConnected) {
 
     console.log("id da client :  " + idPlayerConnected);
 
     id_players.push(idPlayerConnected);
 
+    //il server manda a tutti la lista degli Id di tutti i giocatori connessi
     io.sockets.emit('idPlayerConnectedBroadcast', id_players);
 
   }
@@ -62,10 +66,12 @@ function newConnection(socket) {
     io.sockets.emit('highscore', highscore);
 
 
-
+    //quando un giocatore si disconnette manda a tutti l'Id
     socket.on('disconnect', function() {
       d_player = true;
       io.sockets.emit("idPlayerDisconnected", socket.id);
+      id_player_disconnected = socket.id;
+
 
     }); //per capire se un giocatore si disconnette; il paramentro d_player serve
     //a mantenere in memoria il fatto che qualcuno si sia disconnesso
@@ -77,6 +83,14 @@ function newConnection(socket) {
       d_player = false;
 
       io.sockets.emit("players", players);
+
+      //rimuove l'Id dall'array
+      for (let i = 0; i < id_players.length; i++) {
+        if (id_player_disconnected === id_players[i]) {
+        console.log("player disconnesso " + id_players[i]);
+        id_players.splice(i, 1);
+      }
+    }
 
 
 

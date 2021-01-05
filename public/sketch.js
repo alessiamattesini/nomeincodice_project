@@ -18,12 +18,12 @@ function newConnection() {
   console.log("your id:", socket.id);
   id = socket.id;
 
+  //quando ti connetti mandi il tuo Id agli altri
   socket.emit('idPlayerConnected', socket.id);
 
 }
 
-
-
+//rimuove l'oggetto del player disconnesso dall'array
 socket.on("idPlayerDisconnected", removeIdPlayersDisconnected);
 
 function removeIdPlayersDisconnected(idPlayerDisconnected) {
@@ -37,14 +37,14 @@ function removeIdPlayersDisconnected(idPlayerDisconnected) {
 }
 
 
-
+//riceve la lista di Id e crea i giocatori
 socket.on("idPlayerConnectedBroadcast", createOtherPlayer);
 
 function createOtherPlayer(idOtherPlayer) {
 
-
   for (let k = 0; k < idOtherPlayer.length; k++) {
 
+    //non crea un doppione del giocatore locale
     if (idOtherPlayer[k] !== id) {
       let newPlayer = new OtherPlayer(idOtherPlayer[k], 0, 0);
       myOtherPlayers.push(newPlayer);
@@ -54,7 +54,7 @@ function createOtherPlayer(idOtherPlayer) {
   }
 }
 
-
+//others_micvolume acquisisce id, volume e X
 
 socket.on('micvolume_in', others_micvolume);
 
@@ -63,6 +63,7 @@ function others_micvolume(data) {
   otherX_players = data.mouse_x;
   otherH_players = data.h;
 
+  //riceve i dati info_p e li associa agli Id corrispondenti
   for (let i = 0; i < myOtherPlayers.length; i++) {
 
     if (data.id === myOtherPlayers[i].getId()) {
@@ -154,13 +155,13 @@ function draw() {
     // console.log(otherX_players + "  " + otherH_players);
 
 
+
     for (let j = 0; j < myOtherPlayers.length; j++) {
 
       myOtherPlayers[j].display();
       // console.log(myOtherPlayers[j].h + "  " + myOtherPlayers[j].mouse_x);
 
     }
-
 
     timer = millis();
 
