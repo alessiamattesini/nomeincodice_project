@@ -59,7 +59,7 @@ function newConnection(socket) {
 
   function micvolume_message(dataReceived) {
 
-    highscore += dataReceived.h;
+    highscore += dataReceived.vol;
 
     socket.broadcast.emit('micvolume_in', dataReceived);
 

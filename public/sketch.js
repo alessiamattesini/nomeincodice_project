@@ -92,12 +92,12 @@ function show_players(n_players) {
 
 
 
+//highscore aggiornato secondo la somma ricevuta dal server
 socket.on('highscore', highscore);
 
 function highscore(datahighscore) {
   totalscore = datahighscore;
 }
-
 
 function preload() {}
 
@@ -119,20 +119,21 @@ function setup() {
 
 }
 
-
-
+//variabile per prova visualizzazione sfondo
+let positionRect = 0;
 
 function draw() {
 
   textAlign(CENTER);
+
 
   // Get the overall volume (between 0 and 1.0)
   let vol = mic.getLevel();
   fill(127);
   stroke(0);
 
-  // Draw an ellipse with height based on volume
-  let h = map(vol, 0, 1, 0, height);
+  // // Draw an ellipse with height based on volume
+  let h = map(vol, 0, 1, height, 0);
 
   // console.log("vol " + vol);
   // console.log("h " + h);
@@ -140,6 +141,16 @@ function draw() {
   // rotazione del giroscopio
   const widthY = map(rotationY, -90, 90, 0 , width);
 
+
+//prova visualizzazione sfondo
+  positionRect += (totalscore - prec_totalscore)*10;
+
+  if(positionRect > height){
+    positionRect = 0;
+  }
+
+  rect(random(300,320), positionRect , 10, 100);
+//fine prova
 
 
   if (millis() >= 20 + timer) {
@@ -154,7 +165,8 @@ function draw() {
 
     prec_totalscore = totalscore;
 
-    ellipse(widthY, h + 25, 50, 50);
+    ellipse(widthY, h - 25, 50, 50);
+
 
     // ellipse(otherX_players, otherH_players + 25, 50, 50);
     // console.log(otherX_players + "  " + otherH_players);
@@ -176,7 +188,8 @@ function draw() {
 
     id: id,
     h: h,
-    x: widthY
+    x: widthY,
+    vol: vol
 
   }
 
