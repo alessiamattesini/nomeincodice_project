@@ -31,6 +31,7 @@ function touchEnded(event) {
      DeviceOrientationEvent.requestPermission() }
    }
 
+
 //rimuove l'oggetto del player disconnesso dall'array
 socket.on("idPlayerDisconnected", removeIdPlayersDisconnected);
 
@@ -109,13 +110,17 @@ function highscore(datahighscore) {
 
 function preload() {}
 
-
+let yPlayer;
 
 function setup() {
 
   frameRate(50);
 
+
+
   createCanvas(windowWidth, windowHeight);
+
+  yPlayer = height;
 
   userStartAudio();
   // Create an Audio input
@@ -131,7 +136,9 @@ function setup() {
 //variabile per prova visualizzazione sfondo
 let positionRect = 0;
 
-let yPlayer = 0;
+let maxVol = 0.2;
+
+let easing = 0.05;
 
 function draw() {
 
@@ -140,97 +147,102 @@ function draw() {
 
   // Get the overall volume (between 0 and 1.0)
   let vol = mic.getLevel();
+
+
+  maxVol = max(maxVol, vol);
+
+  console.log("questo max vol : " + maxVol);
+
+
   fill(127);
   stroke(0);
 
   // // Draw an ellipse with height based on volume
-  let h = map(vol, 0, 0.2, height, 0);
+  let h = map(vol, 0, maxVol, height, 0);
 
 
-if(h===0){
-
-  yPlayer = 0;
-
-}
-
-  if(h<height && h>= height / 5 * 4){
-
-    if(yPlayer >= height){
-
-      yPlayer -= 50;
-      // yPlayer = height / 5;
-
-    }else if(yPlayer <= height){
-
-      yPlayer += 50;
-      // yPlayer = height / 5;
-
-    }
-  }
+  let targetY = h;
+  let dy = targetY - yPlayer;
+  yPlayer += dy * easing;
 
 
-  if(h< height / 5 * 4 && h >= height / 5 * 3){
-
-    if(yPlayer >= height / 5 * 4){
-
-      yPlayer -= 50;
-      // yPlayer = height / 5 * 2;
-
-    }else if(yPlayer <= height / 5 * 4){
-
-      yPlayer += 50;
-      // yPlayer = height / 5 * 2;
-
-    }
-  }
 
 
-  if(h<height / 5 * 3 && h >= height / 5 * 2){
-
-    if(yPlayer >= height / 5 * 3){
-
-      yPlayer -= 50;
-      // yPlayer = height / 5 * 3;
-
-    }else if(yPlayer <= height / 5 * 3){
-
-      yPlayer += 50;
-      // yPlayer = height / 5 * 3;
-
-    }
-  }
-
-  if(h < height / 5 * 2 && h>= height / 5){
-
-    if(yPlayer >= height / 5 * 2){
-
-      yPlayer -= 50;
-      // yPlayer = height / 5 * 4;
-
-    }else if(yPlayer <= height / 5 * 2){
-
-      yPlayer += 50;
-      // yPlayer = height / 5 * 4;
-
-    }
-  }
-
-
-  if(h < height / 5 && h >= 0){
-
-    if(yPlayer >= height / 5){
-
-      yPlayer -= 50;
-      // yPlayer = height;
-
-    }else if(yPlayer <= height / 5){
-
-      yPlayer += 50;
-      // yPlayer = height;
-
-    }
-  }
-
+//
+// if(h===0){
+//
+//   yPlayer = 0;
+//
+// }
+//
+//   if(h<height && h>= height / 5 * 4){
+//
+//     if(yPlayer >= height){
+//
+//       yPlayer -= 1;
+//
+//     }else if(yPlayer <= height){
+//
+//       yPlayer += 1;
+//
+//     }
+//   }
+//
+//
+//   if(h< height / 5 * 4 && h >= height / 5 * 3){
+//
+//     if(yPlayer >= height / 5 * 4){
+//
+//       yPlayer -= 1;
+//
+//     }else if(yPlayer <= height / 5 * 4){
+//
+//       yPlayer += 1;
+//
+//     }
+//   }
+//
+//
+//   if(h<height / 5 * 3 && h >= height / 5 * 2){
+//
+//     if(yPlayer >= height / 5 * 3){
+//
+//       yPlayer -= 1;
+//
+//     }else if(yPlayer <= height / 5 * 3){
+//
+//       yPlayer += 1;
+//
+//     }
+//   }
+//
+//   if(h < height / 5 * 2 && h>= height / 5){
+//
+//     if(yPlayer >= height / 5 * 2){
+//
+//       yPlayer -= 1;
+//
+//     }else if(yPlayer <= height / 5 * 2){
+//
+//       yPlayer += 1;
+//
+//     }
+//   }
+//
+//
+//   if(h < height / 5 && h >= 0){
+//
+//     if(yPlayer >= height / 5){
+//
+//       yPlayer -= 1;
+//
+//     }else if(yPlayer <= height / 5){
+//
+//       yPlayer += 1;
+//
+//     }
+//   }
+//
 
 
 
@@ -253,8 +265,7 @@ if(h===0){
 
     background("salmon");
 
-    //ellisse di prova
-    ellipse(200, yPlayer, 50,50);
+
 
     text(totalscore - prec_totalscore, width / 2, 200);
 
@@ -264,7 +275,7 @@ if(h===0){
 
     prec_totalscore = totalscore;
 
-    ellipse(widthY, h - 25, 50, 50);
+    ellipse(widthY, yPlayer - 25, 50, 50);
 
 
     // ellipse(otherX_players, otherH_players + 25, 50, 50);
