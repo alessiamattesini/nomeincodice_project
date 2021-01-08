@@ -23,6 +23,14 @@ function newConnection() {
 
 }
 
+
+// ask for permissions on iOS
+function touchEnded(event) {
+  // check that those functions exist // if they exist it means we are //on iOS and we request the permissions
+   if(DeviceOrientationEvent && DeviceOrientationEvent.requestPermission){
+     DeviceOrientationEvent.requestPermission() }
+   }
+
 //rimuove l'oggetto del player disconnesso dall'array
 socket.on("idPlayerDisconnected", removeIdPlayersDisconnected);
 
@@ -119,8 +127,11 @@ function setup() {
 
 }
 
+
 //variabile per prova visualizzazione sfondo
 let positionRect = 0;
+
+let yPlayer = 0;
 
 function draw() {
 
@@ -133,29 +144,117 @@ function draw() {
   stroke(0);
 
   // // Draw an ellipse with height based on volume
-  let h = map(vol, 0, 1, height, 0);
+  let h = map(vol, 0, 0.2, height, 0);
 
-  // console.log("vol " + vol);
-  // console.log("h " + h);
 
-  // rotazione del giroscopio
+if(h===0){
+
+  yPlayer = 0;
+
+}
+
+  if(h<height && h>= height / 5 * 4){
+
+    if(yPlayer >= height){
+
+      yPlayer -= 50;
+      // yPlayer = height / 5;
+
+    }else if(yPlayer <= height){
+
+      yPlayer += 50;
+      // yPlayer = height / 5;
+
+    }
+  }
+
+
+  if(h< height / 5 * 4 && h >= height / 5 * 3){
+
+    if(yPlayer >= height / 5 * 4){
+
+      yPlayer -= 50;
+      // yPlayer = height / 5 * 2;
+
+    }else if(yPlayer <= height / 5 * 4){
+
+      yPlayer += 50;
+      // yPlayer = height / 5 * 2;
+
+    }
+  }
+
+
+  if(h<height / 5 * 3 && h >= height / 5 * 2){
+
+    if(yPlayer >= height / 5 * 3){
+
+      yPlayer -= 50;
+      // yPlayer = height / 5 * 3;
+
+    }else if(yPlayer <= height / 5 * 3){
+
+      yPlayer += 50;
+      // yPlayer = height / 5 * 3;
+
+    }
+  }
+
+  if(h < height / 5 * 2 && h>= height / 5){
+
+    if(yPlayer >= height / 5 * 2){
+
+      yPlayer -= 50;
+      // yPlayer = height / 5 * 4;
+
+    }else if(yPlayer <= height / 5 * 2){
+
+      yPlayer += 50;
+      // yPlayer = height / 5 * 4;
+
+    }
+  }
+
+
+  if(h < height / 5 && h >= 0){
+
+    if(yPlayer >= height / 5){
+
+      yPlayer -= 50;
+      // yPlayer = height;
+
+    }else if(yPlayer <= height / 5){
+
+      yPlayer += 50;
+      // yPlayer = height;
+
+    }
+  }
+
+
+
+
+  //rotazione del giroscopio
   const widthY = map(rotationY, -90, 90, 0 , width);
 
 
-//prova visualizzazione sfondo
-  positionRect += (totalscore - prec_totalscore)*10;
-
-  if(positionRect > height){
-    positionRect = 0;
-  }
-
-  rect(random(300,320), positionRect , 10, 100);
-//fine prova
+// //prova visualizzazione sfondo
+//   positionRect += (totalscore - prec_totalscore)*10;
+//
+//   if(positionRect > height){
+//     positionRect = 0;
+//   }
+//
+//   rect(320, positionRect , 10, 100);
+// //fine prova
 
 
   if (millis() >= 20 + timer) {
 
     background("salmon");
+
+    //ellisse di prova
+    ellipse(200, yPlayer, 50,50);
 
     text(totalscore - prec_totalscore, width / 2, 200);
 
@@ -220,11 +319,3 @@ class OtherPlayer {
   }
 
 }
-
-
-// ask for permissions on iOS
-function touchEnded(event) {
-  // check that those functions exist // if they exist it means we are //on iOS and we request the permissions
-   if(DeviceOrientationEvent && DeviceOrientationEvent.requestPermission){
-     DeviceOrientationEvent.requestPermission() }
-   }
