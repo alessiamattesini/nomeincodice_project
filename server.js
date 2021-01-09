@@ -24,7 +24,10 @@ let id_players = [];
 
 let id_player_disconnected;
 
+
 require('events').EventEmitter.prototype._maxListeners = 10000;
+
+
 
 
 function newConnection(socket) {

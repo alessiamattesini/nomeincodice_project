@@ -1,5 +1,4 @@
 let socket = io();
-emitter.setMaxListeners();
 
 let mic;
 let sum = 0;
@@ -14,6 +13,8 @@ let otherH_players;
 let myOtherPlayers = [];
 
 
+//---------QUANDO SI CONNETTE MANDA L'ID DEL GIOCATORE LOCALE AL SERVER-----------
+
 socket.on("connect", newConnection);
 
 function newConnection() {
@@ -26,7 +27,8 @@ function newConnection() {
 }
 
 
-// ask for permissions on iOS
+//----------------PERMESSI IOS--------------
+
 function touchEnded(event) {
   // check that those functions exist // if they exist it means we are //on iOS and we request the permissions
   if (DeviceOrientationEvent && DeviceOrientationEvent.requestPermission) {
@@ -35,7 +37,8 @@ function touchEnded(event) {
 }
 
 
-//rimuove l'oggetto del player disconnesso dall'array
+//----------RIMUOVE L'OGGETTO DEL PLAYER SCOLLEGATO-----------
+
 socket.on("idPlayerDisconnected", removeIdPlayersDisconnected);
 
 function removeIdPlayersDisconnected(idPlayerDisconnected) {
@@ -49,7 +52,8 @@ function removeIdPlayersDisconnected(idPlayerDisconnected) {
 }
 
 
-//riceve la lista di Id e crea i giocatori
+//----------RICEVE LISTA ID DEGLI ALTRI GIOCATORI, PER OGNUNO CREA UN OGGETTO DELLA CLASSE--------------
+
 socket.on("idPlayerConnectedBroadcast", createOtherPlayer);
 
 function createOtherPlayer(idOtherPlayer) {
@@ -60,13 +64,14 @@ function createOtherPlayer(idOtherPlayer) {
     if (idOtherPlayer[k] !== id) {
       let newPlayer = new OtherPlayer(idOtherPlayer[k], 0, 0);
       myOtherPlayers.push(newPlayer);
+      }
 
-      // console.log("id da classe " +myOtherPlayers[0].id);
-    }
   }
+
 }
 
-//others_micvolume acquisisce id, volume e X
+
+//-----------ACQUISISCE INFO DEGLI ALTRI PLAYER E LI ASSEGNA CIASCUNO AD UN ELEMENTO DELLA CLASSE---------
 
 socket.on('micvolume_in', others_micvolume);
 
@@ -82,20 +87,14 @@ function others_micvolume(data) {
 
       myOtherPlayers[i].h = data.h;
       myOtherPlayers[i].x = data.x;
-
     }
 
   }
 
-
-  // ellipse(data.x, data.h + 25, 50, 50);
-  // sum = 0;
-  // sum += data.h;
-  // console.log("somma " + sum);
-  // console.log("data "+ data + " " + frameCount);
 }
 
 
+//-------RICEVE QUANTI GIOCATORI SONO CONNESSI-----------
 
 socket.on("players", show_players);
 
@@ -106,7 +105,8 @@ function show_players(n_players) {
 
 
 
-//highscore aggiornato secondo la somma ricevuta dal server
+//-----------HIGHSCORE (aggiornato secondo la somma ricevuta dal server)----------
+
 socket.on('highscore', highscore);
 
 function highscore(datahighscore) {
@@ -114,56 +114,54 @@ function highscore(datahighscore) {
 }
 
 
-function preload() {}
-
 
 
 let yPlayer;
 
 let starsOne = [];
-let numStarsOne = 300;
+let numStarsOne = 300; //quante stelle 1 creare
 
 let starsTwo = [];
-let numStarsTwo = 100;
+let numStarsTwo = 100; //quante stelle 2 creare
+
 
 function setup() {
 
-  frameRate(50);
-
-
-
+  frameRate(60);
   createCanvas(windowWidth, windowHeight);
 
-  yPlayer = height;
+
+//----------AUDIO INPUT, MICROFONO---------
 
   userStartAudio();
   // Create an Audio input
   mic = new p5.AudioIn();
-
-  // start the Audio Input.
-  // By default, it does not .connect() (to the computer speakers)
+  // start the Audio Input.  By default, it does not .connect() (to the computer speakers)
   mic.start();
 
-  for (let p = 0; p < numStarsOne; p++) {
 
+
+  yPlayer = height; // posizione inizale player (parte in basso)
+
+
+
+//----------CREA LE STELLE-----------
+
+  for (let p = 0; p < numStarsOne; p++) {
     let newStarOne = new StarsOne();
     starsOne.push(newStarOne);
-
   }
 
   for (let q = 0; q < numStarsTwo; q++) {
-
     let newStarTwo = new StarsTwo();
     starsTwo.push(newStarTwo);
-
   }
 
 
 }
 
 
-//variabile per prova visualizzazione sfondo
-let positionRect = 0;
+
 let maxVol = 0.1;
 let easing = 0.05;
 let calibrationButton = true;
@@ -173,28 +171,19 @@ let varTimeout;
 
 let vel = 0;
 
+
+
 function draw() {
-
-
-
-
-
-  textAlign(CENTER);
 
 
   // Get the overall volume (between 0 and 1.0)
   let vol = mic.getLevel();
 
-
-  // maxVol = max(maxVol, vol);
-
   console.log("questo max vol : " + maxVol);
 
-
-
-  // // Draw an ellipse with height based on volume
   let h = map(vol, 0, maxVol, height, 0);
 
+  //----------EASE PER FLUIDITA' MOVIMENTI-------------
 
   let targetY = h;
   let dy = targetY - yPlayer;
@@ -202,55 +191,44 @@ function draw() {
 
 
 
-  //rotazione del giroscopio
+  //----------ROTAZIONE DEL GIROSCOPIO--------------
+
   const widthY = map(rotationY, -90, 90, 0, width);
 
 
-
-  // //prova visualizzazione sfondo
-  //   positionRect += (totalscore - prec_totalscore)*10;
-  //
-  //   if(positionRect > height){
-  //     positionRect = 0;
-  //   }
-  //
-  //   rect(320, positionRect , 10, 100);
-  // //fine prova
-
-console.log("vel 1 " + vel);
+  //----------VELOCITA' PER SFONDO PARALLASSE--------
 
   if(prec_totalscore !== 0){
-
     vel = totalscore - prec_totalscore;
-
   }
 
+  prec_totalscore = totalscore; //tiene in memoria l'highscore precedente per
+  //ricavare il cambiamento complessivo di volumi di tutti i giocatori
 
-console.log("vel 2 " + vel);
+
 
 
   background(0);
 
-  for (let p = 0; p < numStarsOne; p++) {
 
+  //----------DISPLAY STELLE SFONDO PARALLASSE--------
+
+  for (let p = 0; p < numStarsOne; p++) {
     starsOne[p].display();
     starsOne[p].move();
-
   }
 
 
-
     for (let q = 0; q < numStarsTwo; q++) {
-
       starsTwo[q].display();
       starsTwo[q].move();
-
     }
 
 
 
   push();
 
+  textAlign(CENTER);
   fill(127);
   stroke(0);
 
@@ -258,27 +236,20 @@ console.log("vel 2 " + vel);
 
   text(totalscore, width / 2, 100);
 
-  // console.log(totalscore - prec_totalscore);
 
-  prec_totalscore = totalscore;
 
   ellipse(widthY, yPlayer - 25, 50, 50);
 
-
-  // ellipse(otherX_players, otherH_players + 25, 50, 50);
-  // console.log(otherX_players + "  " + otherH_players);
-
   pop();
 
+
+  //---------MOSTRA ALTRI GIOCATORI------------
   for (let j = 0; j < myOtherPlayers.length; j++) {
-
     myOtherPlayers[j].display();
-    // console.log(myOtherPlayers[j].h + "  " + myOtherPlayers[j].x);
-
-  }
+    }
 
 
-
+  //--------PARAMETRI PASSATI DEL GIOCATORE AL SERVER----------
   let info_p = {
 
     id: id,
@@ -292,7 +263,7 @@ console.log("vel 2 " + vel);
 
 
 
-  //CALIBRAZIONE MICROFONO
+//------------CALIBRAZIONE MICROFONO----------------
 
   if (calibrationButton) {
 
@@ -302,11 +273,12 @@ console.log("vel 2 " + vel);
     rect(0, 0, width, height);
 
     button = createButton("Calibra Mic");
+
     button.position(width / 2, height / 2);
     button.mousePressed(calibrationMicrophone);
-    button.show();
 
     pop();
+
 
   }
 
@@ -318,17 +290,20 @@ console.log("vel 2 " + vel);
 }
 
 
+
 function calibrationMicrophone() {
   startCalibration = true;
   varTimeout = setTimeout(timerCalibration, 3000);
-}
 
+}
 
 function timerCalibration() {
   startCalibration = false;
   calibrationButton = false;
 }
 
+
+//-----------CLASSE PER ALTRI GIOCATORI-----------
 
 class OtherPlayer {
 
@@ -354,6 +329,7 @@ class OtherPlayer {
 }
 
 
+//-----------CLASSE PER STELLE SFONDO PARALLASSE----------
 
 class StarsOne {
 
