@@ -1,4 +1,6 @@
 let socket = io();
+emitter.setMaxListeners();
+
 let mic;
 let sum = 0;
 let totalscore = 0;
@@ -27,9 +29,10 @@ function newConnection() {
 // ask for permissions on iOS
 function touchEnded(event) {
   // check that those functions exist // if they exist it means we are //on iOS and we request the permissions
-   if(DeviceOrientationEvent && DeviceOrientationEvent.requestPermission){
-     DeviceOrientationEvent.requestPermission() }
-   }
+  if (DeviceOrientationEvent && DeviceOrientationEvent.requestPermission) {
+    DeviceOrientationEvent.requestPermission()
+  }
+}
 
 
 //rimuove l'oggetto del player disconnesso dall'array
@@ -83,6 +86,8 @@ function others_micvolume(data) {
     }
 
   }
+
+
   // ellipse(data.x, data.h + 25, 50, 50);
   // sum = 0;
   // sum += data.h;
@@ -108,9 +113,18 @@ function highscore(datahighscore) {
   totalscore = datahighscore;
 }
 
+
 function preload() {}
 
+
+
 let yPlayer;
+
+let starsOne = [];
+let numStarsOne = 300;
+
+let starsTwo = [];
+let numStarsTwo = 100;
 
 function setup() {
 
@@ -130,17 +144,40 @@ function setup() {
   // By default, it does not .connect() (to the computer speakers)
   mic.start();
 
+  for (let p = 0; p < numStarsOne; p++) {
+
+    let newStarOne = new StarsOne();
+    starsOne.push(newStarOne);
+
+  }
+
+  for (let q = 0; q < numStarsTwo; q++) {
+
+    let newStarTwo = new StarsTwo();
+    starsTwo.push(newStarTwo);
+
+  }
+
+
 }
 
 
 //variabile per prova visualizzazione sfondo
 let positionRect = 0;
-
-let maxVol = 0.2;
-
+let maxVol = 0.1;
 let easing = 0.05;
+let calibrationButton = true;
+let button;
+let startCalibration = false;
+let varTimeout;
+
+let vel = 0;
 
 function draw() {
+
+
+
+
 
   textAlign(CENTER);
 
@@ -149,13 +186,11 @@ function draw() {
   let vol = mic.getLevel();
 
 
-  maxVol = max(maxVol, vol);
+  // maxVol = max(maxVol, vol);
 
   console.log("questo max vol : " + maxVol);
 
 
-  fill(127);
-  stroke(0);
 
   // // Draw an ellipse with height based on volume
   let h = map(vol, 0, maxVol, height, 0);
@@ -167,137 +202,87 @@ function draw() {
 
 
 
-
-//
-// if(h===0){
-//
-//   yPlayer = 0;
-//
-// }
-//
-//   if(h<height && h>= height / 5 * 4){
-//
-//     if(yPlayer >= height){
-//
-//       yPlayer -= 1;
-//
-//     }else if(yPlayer <= height){
-//
-//       yPlayer += 1;
-//
-//     }
-//   }
-//
-//
-//   if(h< height / 5 * 4 && h >= height / 5 * 3){
-//
-//     if(yPlayer >= height / 5 * 4){
-//
-//       yPlayer -= 1;
-//
-//     }else if(yPlayer <= height / 5 * 4){
-//
-//       yPlayer += 1;
-//
-//     }
-//   }
-//
-//
-//   if(h<height / 5 * 3 && h >= height / 5 * 2){
-//
-//     if(yPlayer >= height / 5 * 3){
-//
-//       yPlayer -= 1;
-//
-//     }else if(yPlayer <= height / 5 * 3){
-//
-//       yPlayer += 1;
-//
-//     }
-//   }
-//
-//   if(h < height / 5 * 2 && h>= height / 5){
-//
-//     if(yPlayer >= height / 5 * 2){
-//
-//       yPlayer -= 1;
-//
-//     }else if(yPlayer <= height / 5 * 2){
-//
-//       yPlayer += 1;
-//
-//     }
-//   }
-//
-//
-//   if(h < height / 5 && h >= 0){
-//
-//     if(yPlayer >= height / 5){
-//
-//       yPlayer -= 1;
-//
-//     }else if(yPlayer <= height / 5){
-//
-//       yPlayer += 1;
-//
-//     }
-//   }
-//
-
-
-
   //rotazione del giroscopio
-  const widthY = map(rotationY, -90, 90, 0 , width);
-
-
-// //prova visualizzazione sfondo
-//   positionRect += (totalscore - prec_totalscore)*10;
-//
-//   if(positionRect > height){
-//     positionRect = 0;
-//   }
-//
-//   rect(320, positionRect , 10, 100);
-// //fine prova
-
-
-  if (millis() >= 20 + timer) {
-
-    background("salmon");
+  const widthY = map(rotationY, -90, 90, 0, width);
 
 
 
-    text(totalscore - prec_totalscore, width / 2, 200);
+  // //prova visualizzazione sfondo
+  //   positionRect += (totalscore - prec_totalscore)*10;
+  //
+  //   if(positionRect > height){
+  //     positionRect = 0;
+  //   }
+  //
+  //   rect(320, positionRect , 10, 100);
+  // //fine prova
 
-    text(totalscore, width / 2, 100);
+console.log("vel 1 " + vel);
 
-    // console.log(totalscore - prec_totalscore);
+  if(prec_totalscore !== 0){
 
-    prec_totalscore = totalscore;
+    vel = totalscore - prec_totalscore;
 
-    ellipse(widthY, yPlayer - 25, 50, 50);
-
-
-    // ellipse(otherX_players, otherH_players + 25, 50, 50);
-    // console.log(otherX_players + "  " + otherH_players);
+  }
 
 
+console.log("vel 2 " + vel);
 
-    for (let j = 0; j < myOtherPlayers.length; j++) {
 
-      myOtherPlayers[j].display();
-      // console.log(myOtherPlayers[j].h + "  " + myOtherPlayers[j].x);
+  background(0);
+
+  for (let p = 0; p < numStarsOne; p++) {
+
+    starsOne[p].display();
+    starsOne[p].move();
+
+  }
+
+
+
+    for (let q = 0; q < numStarsTwo; q++) {
+
+      starsTwo[q].display();
+      starsTwo[q].move();
 
     }
 
-    timer = millis();
+
+
+  push();
+
+  fill(127);
+  stroke(0);
+
+  text(vel, width / 2, 200);
+
+  text(totalscore, width / 2, 100);
+
+  // console.log(totalscore - prec_totalscore);
+
+  prec_totalscore = totalscore;
+
+  ellipse(widthY, yPlayer - 25, 50, 50);
+
+
+  // ellipse(otherX_players, otherH_players + 25, 50, 50);
+  // console.log(otherX_players + "  " + otherH_players);
+
+  pop();
+
+  for (let j = 0; j < myOtherPlayers.length; j++) {
+
+    myOtherPlayers[j].display();
+    // console.log(myOtherPlayers[j].h + "  " + myOtherPlayers[j].x);
 
   }
+
+
 
   let info_p = {
 
     id: id,
-    h: h,
+    h: yPlayer,
     x: widthY,
     vol: vol
 
@@ -305,6 +290,43 @@ function draw() {
 
   socket.emit('micvolume', info_p);
 
+
+
+  //CALIBRAZIONE MICROFONO
+
+  if (calibrationButton) {
+
+    push();
+
+    fill("red");
+    rect(0, 0, width, height);
+
+    button = createButton("Calibra Mic");
+    button.position(width / 2, height / 2);
+    button.mousePressed(calibrationMicrophone);
+    button.show();
+
+    pop();
+
+  }
+
+  if (startCalibration) {
+    maxVol = max(maxVol, vol);
+  }
+
+
+}
+
+
+function calibrationMicrophone() {
+  startCalibration = true;
+  varTimeout = setTimeout(timerCalibration, 3000);
+}
+
+
+function timerCalibration() {
+  startCalibration = false;
+  calibrationButton = false;
 }
 
 
@@ -327,6 +349,84 @@ class OtherPlayer {
 
   getId() {
     return this.id;
+  }
+
+}
+
+
+
+class StarsOne {
+
+  constructor() {
+
+    this.r = 2;
+    this.x = random(0, width);
+    this.y = random(0, height);
+    // console.log("y " + this.y);
+  }
+
+  display() {
+
+    push();
+    noStroke();
+    fill(255);
+    ellipse(this.x, this.y, this.r, this.r);
+    pop();
+    // console.log("y display" + this.y);
+
+  }
+
+  move() {
+
+    if (this.y > height) //if the star goes below the screen
+    {
+      this.y = 0; //reset to the top of the screen
+      this.x = random(0, width);
+      // console.log("y 2 " + this.y);
+    } else {
+      this.y += vel;
+      // console.log("y 3 " + this.y);
+    }
+  }
+
+}
+
+
+
+
+
+class StarsTwo {
+
+  constructor() {
+
+    this.r = 5;
+    this.x = random(0, width);
+    this.y = random(0, height);
+    // console.log("y " + this.y);
+  }
+
+  display() {
+
+    push();
+    noStroke();
+    fill(255);
+    ellipse(this.x, this.y, this.r, this.r);
+    pop();
+    // console.log("y display" + this.y);
+
+  }
+
+  move() {
+
+    if (this.y > height) //if the star goes below the screen
+    {
+      this.y = 0; //reset to the top of the screen
+      this.x = random(0, width);
+      // console.log("y 2 " + this.y);
+    } else {
+      this.y += vel*3;
+      // console.log("y 3 " + this.y);
+    }
   }
 
 }

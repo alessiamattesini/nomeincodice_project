@@ -24,11 +24,12 @@ let id_players = [];
 
 let id_player_disconnected;
 
-
-
+require('events').EventEmitter.prototype._maxListeners = 10000;
 
 
 function newConnection(socket) {
+
+
 
   players++; //per ogni connessione aggiungo un giocatore
 
