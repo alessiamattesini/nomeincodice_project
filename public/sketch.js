@@ -284,9 +284,7 @@ function draw() {
 
     pop();
 
-    calibrationButton = false;
-
-
+    
   }
 
   if (startCalibration) {
@@ -306,7 +304,7 @@ function calibrationMicrophone() {
 
 function timerCalibration() {
   startCalibration = false;
-
+  calibrationButton = false;
 }
 
 
