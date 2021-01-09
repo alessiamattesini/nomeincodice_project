@@ -265,25 +265,33 @@ function draw() {
 
 //------------CALIBRAZIONE MICROFONO----------------
 
+
   if (calibrationButton) {
+
 
     push();
 
-    fill("red");
+    fill("salmon");
     rect(0, 0, width, height);
 
-    button = createButton("Calibra Mic");
+    if(!button){
+      button = createButton("Calibra Mic");
+    }
 
     button.position(width / 2, height / 2);
+
     button.mousePressed(calibrationMicrophone);
 
     pop();
+
+    calibrationButton = false;
 
 
   }
 
   if (startCalibration) {
     maxVol = max(maxVol, vol);
+    button.remove();
   }
 
 
@@ -294,13 +302,14 @@ function draw() {
 function calibrationMicrophone() {
   startCalibration = true;
   varTimeout = setTimeout(timerCalibration, 3000);
-
 }
 
 function timerCalibration() {
   startCalibration = false;
-  calibrationButton = false;
+
 }
+
+
 
 
 //-----------CLASSE PER ALTRI GIOCATORI-----------
