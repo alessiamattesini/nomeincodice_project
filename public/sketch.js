@@ -182,6 +182,7 @@ let vel = 0;
 let timerBonus = 0;
 let checkTimer = 0;
 let bonus = false;
+let bonusDuration = 0;
 
 
 
@@ -220,11 +221,14 @@ function draw() {
   //ricavare il cambiamento complessivo di volumi di tutti i giocatori
 
 
+  if(!bonus){
+    background(0);
+  }
 
 
-  background(0);
 
 //--------------BONUSSSS---------------
+if (!startCalibration) {
 
     let checkBonus = 0;
 
@@ -235,8 +239,7 @@ function draw() {
       if (yPlayer < myOtherPlayers[u].h + 100 && yPlayer > myOtherPlayers[u].h - 100) {
 
         checkBonus++;
-        // console.log("condizione vicinanza ok");
-
+        
       } else {
         checkTimer++;
         timerBonus = 0;
@@ -245,18 +248,25 @@ function draw() {
 
     if (checkTimer===0) {
       timerBonus++;
-      console.log("dentro check timer");
       }
 
     if (checkBonus === myOtherPlayers.length && checkBonus != 0 && timerBonus === 10) {
-      console.log("bonus");
       bonus = true;
+
     }
 
     if(bonus){
-      background(0, 0, 0, 50);
-    }
 
+      if(bonusDuration<120){
+        background(0, 0, 0, 50);
+        vel+=10000;
+      }else{bonus=false;}
+
+      bonusDuration++;
+
+    }else{bonusDuration = 0;}
+
+}
 
   //----------DISPLAY STELLE SFONDO PARALLASSE--------
 
