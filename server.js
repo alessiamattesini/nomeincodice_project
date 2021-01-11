@@ -25,7 +25,7 @@ let id_players = [];
 let id_player_disconnected;
 
 
-require('events').EventEmitter.prototype._maxListeners = 10000;
+require('events').EventEmitter.prototype._maxListeners = 1000000;
 
 
 
@@ -63,7 +63,7 @@ function newConnection(socket) {
 
   function micvolume_message(dataReceived) {
 
-    highscore += dataReceived.vol;
+    highscore += (dataReceived.vol);
 
     socket.broadcast.emit('micvolume_in', dataReceived);
 

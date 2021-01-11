@@ -64,7 +64,7 @@ function createOtherPlayer(idOtherPlayer) {
     if (idOtherPlayer[k] !== id) {
       let newPlayer = new OtherPlayer(idOtherPlayer[k], 0, 0);
       myOtherPlayers.push(newPlayer);
-      }
+    }
 
   }
 
@@ -124,14 +124,16 @@ let numStarsOne = 300; //quante stelle 1 creare
 let starsTwo = [];
 let numStarsTwo = 100; //quante stelle 2 creare
 
+let starsThree = [];
+let numStarsThree = 30; //quante stelle 3 creare
+
 
 function setup() {
 
   frameRate(60);
   createCanvas(windowWidth, windowHeight);
 
-
-//----------AUDIO INPUT, MICROFONO---------
+  //----------AUDIO INPUT, MICROFONO---------
 
   userStartAudio();
   // Create an Audio input
@@ -145,7 +147,7 @@ function setup() {
 
 
 
-//----------CREA LE STELLE-----------
+  //----------CREA LE STELLE-----------
 
   for (let p = 0; p < numStarsOne; p++) {
     let newStarOne = new StarsOne();
@@ -156,6 +158,12 @@ function setup() {
     let newStarTwo = new StarsTwo();
     starsTwo.push(newStarTwo);
   }
+
+  for (let r = 0; r < numStarsThree; r++) {
+    let newStarThree = new StarsThree();
+    starsThree.push(newStarThree);
+  }
+
 
 
 }
@@ -171,6 +179,10 @@ let varTimeout;
 
 let vel = 0;
 
+let timerBonus = 0;
+let checkTimer = 0;
+let bonus = false;
+
 
 
 function draw() {
@@ -179,9 +191,11 @@ function draw() {
   // Get the overall volume (between 0 and 1.0)
   let vol = mic.getLevel();
 
-  console.log("questo max vol : " + maxVol);
+  // console.log("questo max vol : " + maxVol);
 
   let h = map(vol, 0, maxVol, height, 0);
+
+  let volHighscore = map(vol, 0, maxVol, 0, height);
 
   //----------EASE PER FLUIDITA' MOVIMENTI-------------
 
@@ -198,7 +212,7 @@ function draw() {
 
   //----------VELOCITA' PER SFONDO PARALLASSE--------
 
-  if(prec_totalscore !== 0){
+  if (prec_totalscore !== 0) {
     vel = totalscore - prec_totalscore;
   }
 
@@ -210,13 +224,48 @@ function draw() {
 
   background(0);
 
+//--------------BONUSSSS---------------
+
+    let checkBonus = 0;
+
+    checkTimer = 0;
+
+    for (let u = 0; u < myOtherPlayers.length; u++) {
+
+      if (yPlayer < myOtherPlayers[u].h + 100 && yPlayer > myOtherPlayers[u].h - 100) {
+
+        checkBonus++;
+        // console.log("condizione vicinanza ok");
+
+      } else {
+        checkTimer++;
+        timerBonus = 0;
+      }
+    }
+
+    if (checkTimer===0) {
+      timerBonus++;
+      console.log("dentro check timer");
+      }
+
+    if (checkBonus === myOtherPlayers.length && checkBonus != 0 && timerBonus === 10) {
+      console.log("bonus");
+      bonus = true;
+    }
+
+    if(bonus){
+      background(0, 0, 0, 50);
+    }
+
 
   //----------DISPLAY STELLE SFONDO PARALLASSE--------
 
-  for (let p = 0; p < numStarsOne; p++) {
-    starsOne[p].display();
-    starsOne[p].move();
-  }
+  if (!startCalibration) {
+
+    for (let p = 0; p < numStarsOne; p++) {
+      starsOne[p].display();
+      starsOne[p].move();
+    }
 
 
     for (let q = 0; q < numStarsTwo; q++) {
@@ -224,12 +273,18 @@ function draw() {
       starsTwo[q].move();
     }
 
+    for (let r = 0; r < numStarsThree; r++) {
+      starsThree[r].display();
+      starsThree[r].move();
+    }
 
+
+  }
 
   push();
 
   textAlign(CENTER);
-  fill(127);
+  fill("yellow");
   stroke(0);
 
   text(vel, width / 2, 200);
@@ -237,8 +292,7 @@ function draw() {
   text(totalscore, width / 2, 100);
 
 
-
-  ellipse(widthY, yPlayer - 25, 50, 50);
+  ellipse(widthY, yPlayer - 25, 20, 20);
 
   pop();
 
@@ -246,7 +300,7 @@ function draw() {
   //---------MOSTRA ALTRI GIOCATORI------------
   for (let j = 0; j < myOtherPlayers.length; j++) {
     myOtherPlayers[j].display();
-    }
+  }
 
 
   //--------PARAMETRI PASSATI DEL GIOCATORE AL SERVER----------
@@ -255,7 +309,7 @@ function draw() {
     id: id,
     h: yPlayer,
     x: widthY,
-    vol: vol
+    vol: volHighscore
 
   }
 
@@ -263,7 +317,7 @@ function draw() {
 
 
 
-//------------CALIBRAZIONE MICROFONO----------------
+  //------------CALIBRAZIONE MICROFONO----------------
 
 
   if (calibrationButton) {
@@ -274,7 +328,7 @@ function draw() {
     fill("salmon");
     rect(0, 0, width, height);
 
-    if(!button){
+    if (!button) {
       button = createButton("Calibra Mic");
     }
 
@@ -284,13 +338,17 @@ function draw() {
 
     pop();
 
-    
+
   }
 
   if (startCalibration) {
     maxVol = max(maxVol, vol);
     button.remove();
   }
+
+
+
+
 
 
 }
@@ -316,8 +374,8 @@ class OtherPlayer {
 
   constructor(id, x, h) {
     this.id = id;
-    this.h = h;
     this.x = x;
+    this.h = h;
   }
 
   display() {
@@ -325,7 +383,7 @@ class OtherPlayer {
     fill(127);
     stroke(0);
 
-    ellipse(this.x, this.h + 25, 50, 50);
+    ellipse(this.x, this.h + 25, 20, 20);
     pop();
   }
 
@@ -339,6 +397,46 @@ class OtherPlayer {
 //-----------CLASSE PER STELLE SFONDO PARALLASSE----------
 
 class StarsOne {
+
+  constructor() {
+
+    this.r = 1;
+    this.x = random(0, width);
+    this.y = random(0, height);
+    // console.log("y " + this.y);
+  }
+
+  display() {
+
+    push();
+    noStroke();
+    fill(255);
+    ellipse(this.x, this.y, this.r, this.r);
+    pop();
+    // console.log("y display" + this.y);
+
+  }
+
+  move() {
+
+    if (this.y > height) //if the star goes below the screen
+    {
+      this.y = 0; //reset to the top of the screen
+      this.x = random(0, width);
+      // console.log("y 2 " + this.y);
+    } else {
+      this.y += vel / 2000;
+      // console.log("y 3 " + this.y);
+    }
+  }
+
+}
+
+
+
+
+
+class StarsTwo {
 
   constructor() {
 
@@ -367,7 +465,7 @@ class StarsOne {
       this.x = random(0, width);
       // console.log("y 2 " + this.y);
     } else {
-      this.y += vel;
+      this.y += vel / 1000;
       // console.log("y 3 " + this.y);
     }
   }
@@ -377,12 +475,11 @@ class StarsOne {
 
 
 
-
-class StarsTwo {
+class StarsThree {
 
   constructor() {
 
-    this.r = 5;
+    this.r = 3;
     this.x = random(0, width);
     this.y = random(0, height);
     // console.log("y " + this.y);
@@ -407,7 +504,7 @@ class StarsTwo {
       this.x = random(0, width);
       // console.log("y 2 " + this.y);
     } else {
-      this.y += vel*3;
+      this.y += vel / 500;
       // console.log("y 3 " + this.y);
     }
   }
