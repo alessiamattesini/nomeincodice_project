@@ -96,8 +96,6 @@ function newConnection(socket) {
       }
     }
 
-
-
     } // dato che la disconnessione dura più di un tick questo if esterno
     //serve  a non decrementare "players" più di una volta per ogni disconnect
 

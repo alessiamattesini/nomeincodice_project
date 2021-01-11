@@ -10,6 +10,9 @@ let timer = 0;
 let otherX_players;
 let otherH_players;
 
+let yRatio;
+
+
 let myOtherPlayers = [];
 
 
@@ -78,14 +81,14 @@ socket.on('micvolume_in', others_micvolume);
 function others_micvolume(data) {
 
   otherX_players = data.x;
-  otherH_players = data.h;
+  otherH_players = data.h*windowHeight;
 
   //riceve i dati info_p e li associa agli Id corrispondenti
   for (let i = 0; i < myOtherPlayers.length; i++) {
 
     if (data.id === myOtherPlayers[i].getId()) {
 
-      myOtherPlayers[i].h = data.h;
+      myOtherPlayers[i].h = otherH_players;
       myOtherPlayers[i].x = data.x;
     }
 
@@ -119,10 +122,10 @@ function highscore(datahighscore) {
 let yPlayer;
 
 let starsOne = [];
-let numStarsOne = 300; //quante stelle 1 creare
+let numStarsOne = 200; //quante stelle 1 creare
 
 let starsTwo = [];
-let numStarsTwo = 100; //quante stelle 2 creare
+let numStarsTwo = 80; //quante stelle 2 creare
 
 let starsThree = [];
 let numStarsThree = 30; //quante stelle 3 creare
@@ -149,20 +152,38 @@ function setup() {
 
   //----------CREA LE STELLE-----------
 
-  for (let p = 0; p < numStarsOne; p++) {
-    let newStarOne = new StarsOne();
-    starsOne.push(newStarOne);
-  }
+  // for (let p = 0; p < numStarsOne; p++) {
+  //   let newStarOne = new StarsOne();
+  //   starsOne.push(newStarOne);
+  // }
+  //
+  // for (let q = 0; q < numStarsTwo; q++) {
+  //   let newStarTwo = new StarsTwo();
+  //   starsTwo.push(newStarTwo);
+  // }
+  //
+  // for (let r = 0; r < numStarsThree; r++) {
+  //   let newStarThree = new StarsThree();
+  //   starsThree.push(newStarThree);
+  // }
 
-  for (let q = 0; q < numStarsTwo; q++) {
-    let newStarTwo = new StarsTwo();
-    starsTwo.push(newStarTwo);
-  }
 
-  for (let r = 0; r < numStarsThree; r++) {
-    let newStarThree = new StarsThree();
-    starsThree.push(newStarThree);
-  }
+
+    for (let p = 0; p < numStarsOne; p++) {
+      let newStarOne = new StarsOne();
+      starsOne.push(newStarOne);
+
+      if(p<numStarsTwo){
+        let newStarTwo = new StarsTwo();
+          starsTwo.push(newStarTwo);
+      }
+
+      if(p<numStarsThree){
+        let newStarThree = new StarsThree();
+        starsThree.push(newStarThree);
+      }
+
+    }
 
 
 
@@ -198,6 +219,10 @@ function draw() {
 
   let volHighscore = map(vol, 0, maxVol, 0, height);
 
+  h = round(h); //meno numeri dopo la virgola più leggero il codice? forse, boh ci spero
+  volHighscore = round(volHighscore);
+
+
   //----------EASE PER FLUIDITA' MOVIMENTI-------------
 
   let targetY = h;
@@ -228,6 +253,7 @@ function draw() {
 
 
 //--------------BONUSSSS---------------
+
 if (!startCalibration) {
 
     let checkBonus = 0;
@@ -235,6 +261,9 @@ if (!startCalibration) {
     checkTimer = 0;
 
     for (let u = 0; u < myOtherPlayers.length; u++) {
+
+      // console.log(myOtherPlayers[u].h);
+      // console.log(u);
 
       if (yPlayer < myOtherPlayers[u].h + 100 && yPlayer > myOtherPlayers[u].h - 100) {
 
@@ -252,7 +281,6 @@ if (!startCalibration) {
 
     if (checkBonus === myOtherPlayers.length && checkBonus != 0 && timerBonus === 120) {
       bonus = true;
-
     }
 
     if(bonus){
@@ -288,8 +316,8 @@ if (!startCalibration) {
       starsThree[r].move();
     }
 
-
   }
+
 
   push();
 
@@ -300,6 +328,10 @@ if (!startCalibration) {
   text(vel, width / 2, 200);
 
   text(totalscore, width / 2, 100);
+
+  text(windowHeight, width/2, 450);
+
+  text(displayHeight, width/2, 500);
 
 
   ellipse(widthY, yPlayer - 25, 20, 20);
@@ -314,10 +346,16 @@ if (!startCalibration) {
 
 
   //--------PARAMETRI PASSATI DEL GIOCATORE AL SERVER----------
+
+  yRatio = yPlayer / windowHeight * 100000;
+  yRatio = round(yRatio);
+  yRatio= yRatio/100000;
+
+
   let info_p = {
 
     id: id,
-    h: yPlayer,
+    h: yRatio,
     x: widthY,
     vol: volHighscore
 
@@ -393,7 +431,7 @@ class OtherPlayer {
     fill(127);
     stroke(0);
 
-    ellipse(this.x, this.h + 25, 20, 20);
+    ellipse(this.x, this.h - 25, 20, 20);
     pop();
   }
 
