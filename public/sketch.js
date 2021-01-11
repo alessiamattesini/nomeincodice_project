@@ -239,7 +239,7 @@ if (!startCalibration) {
       if (yPlayer < myOtherPlayers[u].h + 100 && yPlayer > myOtherPlayers[u].h - 100) {
 
         checkBonus++;
-        
+
       } else {
         checkTimer++;
         timerBonus = 0;
@@ -250,14 +250,14 @@ if (!startCalibration) {
       timerBonus++;
       }
 
-    if (checkBonus === myOtherPlayers.length && checkBonus != 0 && timerBonus === 10) {
+    if (checkBonus === myOtherPlayers.length && checkBonus != 0 && timerBonus === 120) {
       bonus = true;
 
     }
 
     if(bonus){
 
-      if(bonusDuration<120){
+      if(bonusDuration<60){
         background(0, 0, 0, 50);
         vel+=10000;
       }else{bonus=false;}
