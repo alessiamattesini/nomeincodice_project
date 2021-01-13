@@ -25,8 +25,7 @@ let id_players = [];
 let id_player_disconnected;
 
 
-require('events').EventEmitter.prototype._maxListeners = 1000000;
-
+// require('events').EventEmitter.prototype._maxListeners = 1000000;
 
 
 
@@ -57,28 +56,12 @@ function newConnection(socket) {
 
   console.log('new connection:', socket.client.id);
 
+  //quando un giocatore si disconnette manda a tutti l'Id
+  socket.on('disconnect', function() {
+    d_player = true;
+    io.sockets.emit("idPlayerDisconnected", socket.id);
+    id_player_disconnected = socket.id;
 
-
-  socket.on('micvolume', micvolume_message);
-
-  function micvolume_message(dataReceived) {
-
-    highscore += (dataReceived.vol);
-
-    socket.broadcast.emit('micvolume_in', dataReceived);
-
-    io.sockets.emit('highscore', highscore);
-
-
-    //quando un giocatore si disconnette manda a tutti l'Id
-    socket.on('disconnect', function() {
-      d_player = true;
-      io.sockets.emit("idPlayerDisconnected", socket.id);
-      id_player_disconnected = socket.id;
-
-
-    }); //per capire se un giocatore si disconnette; il paramentro d_player serve
-    //a mantenere in memoria il fatto che qualcuno si sia disconnesso
 
     if (d_player) {
 
@@ -91,16 +74,48 @@ function newConnection(socket) {
       //rimuove l'Id dall'array
       for (let i = 0; i < id_players.length; i++) {
         if (id_player_disconnected === id_players[i]) {
-        console.log("player disconnesso " + id_players[i]);
-        id_players.splice(i, 1);
+          console.log("player disconnesso " + id_players[i]);
+          id_players.splice(i, 1);
+        }
       }
-    }
 
     } // dato che la disconnessione dura più di un tick questo if esterno
     //serve  a non decrementare "players" più di una volta per ogni disconnect
 
 
+  }); //per capire se un giocatore si disconnette; il paramentro d_player serve
+  //a mantenere in memoria il fatto che qualcuno si sia disconnesso
+
+
+
+  socket.on('micvolume', micvolume_message);
+
+  function micvolume_message(dataReceived) {
+
+    highscore += (dataReceived.vol);
+
+    socket.broadcast.emit('micvolume_in', dataReceived);
+
+    io.sockets.emit('highscore', highscore);
+
   }
 
+
+  socket.on('bonus', function(bonus_value) {
+
+    io.sockets.emit("bonus_effect", bonus_value);
+
+  });
+
+
+}
+
+
+let myInterval = setInterval(send_obstacle_x, 1000);
+
+function send_obstacle_x(){
+
+  let numRandom = Math.floor((Math.random() * 1000) + 1);
+  io.sockets.emit("obstacle_x", numRandom);
 
 }

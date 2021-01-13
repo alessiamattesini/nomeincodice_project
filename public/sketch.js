@@ -117,6 +117,32 @@ function highscore(datahighscore) {
 }
 
 
+let bonusServer = false;
+
+socket.on('bonus_effect', bonusEffect);
+
+function bonusEffect(bonusValue) {
+  console.log("dentro funzione bonusEffect");
+  bonusServer = bonusValue;
+}
+
+
+let obstacleX = 0;
+
+let obstacles = [];
+
+socket.on('obstacle_x', createObstacle);
+
+function createObstacle(obstacleXServer){
+
+  obstacleX = obstacleXServer/1000*windowWidth;
+  let newObstacle = new Obstacle(obstacleX);
+  obstacles.push(newObstacle);
+
+  // console.log("obstacleXServer " + obstacleXServer);
+
+}
+
 
 
 let yPlayer;
@@ -205,6 +231,10 @@ let checkTimer = 0;
 let bonus = false;
 let bonusDuration = 0;
 
+let bx;
+let by;
+let collision = false;
+let d;
 
 
 function draw() {
@@ -281,15 +311,24 @@ function draw() {
 
     if (checkBonus === myOtherPlayers.length && checkBonus != 0 && timerBonus === 120) {
       bonus = true;
+      socket.emit('bonus', bonus);
+      console.log("dentro condizioni giuste bonus");
+      bonus = false;
     }
 
-    if (bonus) {
+    if (bonusServer) {
+      console.log("dentro bonus server if");
 
-      if (bonusDuration < 60) {
+      if (bonusDuration < 50) {
         background(0, 0, 0, 50);
         vel += 10000;
+      } else if(bonusDuration < 60 && bonusDuration > 50){
+
+        background(0, 0, 0, 50);
+        vel += 5000;
+
       } else {
-        bonus = false;
+        bonusServer = false;
       }
 
       bonusDuration++;
@@ -321,6 +360,29 @@ function draw() {
     }
 
   }
+
+
+
+//-------------OSTACOLI-------------
+
+
+
+for (let l = 0; l < obstacles.length; l++) {
+
+  obstacles[l].display();
+  obstacles[l].move();
+
+  if(obstacles[l].y===(height+15)){
+    obstacles[l].splice(l,1);
+  }
+
+
+
+}
+
+
+
+
 
   //---------MOSTRA ALTRI GIOCATORI------------
   for (let j = 0; j < myOtherPlayers.length; j++) {
@@ -365,6 +427,36 @@ function draw() {
 
 
 
+  //------------COLLISIONI-------------
+
+  bx = widthY;
+  by = yPlayer - 10;
+
+  for(let t = 0; t < obstacles.length; t++){
+
+    d = dist (bx, by, obstacles[t].x,obstacles[t].y);
+
+    if(d < 20){
+
+      collision = true;
+
+      // obstacles[t].splice(t,1);
+
+    }
+
+  }
+
+
+if(collision){
+
+  console.log("collisione");
+
+  // yPlayer += 200;
+
+  collision = false;
+
+}
+
 
   //--------PARAMETRI PASSATI DEL GIOCATORE AL SERVER----------
 
@@ -391,7 +483,6 @@ function draw() {
 
   if (calibrationButton) {
 
-
     push();
 
     fill("salmon");
@@ -406,7 +497,6 @@ function draw() {
     button.mousePressed(calibrationMicrophone);
 
     pop();
-
 
   }
 
@@ -583,4 +673,40 @@ class StarsThree {
       this.y += vel / 400;
     }
   }
+}
+
+
+
+class Obstacle {
+
+  constructor(obstacleX) {
+
+    this.r = 30;
+    this.x = obstacleX;
+    this.y = -15;
+
+  }
+
+  display() {
+
+    push();
+    noStroke();
+    fill(255);
+    ellipseMode(CENTER);
+    ellipse(this.x, this.y, this.r);
+    pop();
+
+  }
+
+
+    move() {
+
+      if (this.y > height+15) //if the star goes below the screen
+      {
+        // autodistruzione
+      } else {
+        this.y += vel/100;
+      }
+    }
+
 }
