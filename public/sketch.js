@@ -81,7 +81,7 @@ socket.on('micvolume_in', others_micvolume);
 function others_micvolume(data) {
 
   otherX_players = data.x;
-  otherH_players = data.h*windowHeight;
+  otherH_players = data.h * windowHeight;
 
   //riceve i dati info_p e li associa agli Id corrispondenti
   for (let i = 0; i < myOtherPlayers.length; i++) {
@@ -169,21 +169,21 @@ function setup() {
 
 
 
-    for (let p = 0; p < numStarsOne; p++) {
-      let newStarOne = new StarsOne();
-      starsOne.push(newStarOne);
+  for (let p = 0; p < numStarsOne; p++) {
+    let newStarOne = new StarsOne();
+    starsOne.push(newStarOne);
 
-      if(p<numStarsTwo){
-        let newStarTwo = new StarsTwo();
-          starsTwo.push(newStarTwo);
-      }
-
-      if(p<numStarsThree){
-        let newStarThree = new StarsThree();
-        starsThree.push(newStarThree);
-      }
-
+    if (p < numStarsTwo) {
+      let newStarTwo = new StarsTwo();
+      starsTwo.push(newStarTwo);
     }
+
+    if (p < numStarsThree) {
+      let newStarThree = new StarsThree();
+      starsThree.push(newStarThree);
+    }
+
+  }
 
 
 
@@ -246,15 +246,15 @@ function draw() {
   //ricavare il cambiamento complessivo di volumi di tutti i giocatori
 
 
-  if(!bonus){
+  if (!bonus) {
     background(0);
   }
 
 
 
-//--------------BONUSSSS---------------
+  //--------------BONUSSSS---------------
 
-if (!startCalibration) {
+  if (!startCalibration) {
 
     let checkBonus = 0;
 
@@ -275,26 +275,30 @@ if (!startCalibration) {
       }
     }
 
-    if (checkTimer===0) {
+    if (checkTimer === 0) {
       timerBonus++;
-      }
+    }
 
     if (checkBonus === myOtherPlayers.length && checkBonus != 0 && timerBonus === 120) {
       bonus = true;
     }
 
-    if(bonus){
+    if (bonus) {
 
-      if(bonusDuration<60){
+      if (bonusDuration < 60) {
         background(0, 0, 0, 50);
-        vel+=10000;
-      }else{bonus=false;}
+        vel += 10000;
+      } else {
+        bonus = false;
+      }
 
       bonusDuration++;
 
-    }else{bonusDuration = 0;}
+    } else {
+      bonusDuration = 0;
+    }
 
-}
+  }
 
   //----------DISPLAY STELLE SFONDO PARALLASSE--------
 
@@ -318,6 +322,12 @@ if (!startCalibration) {
 
   }
 
+  //---------MOSTRA ALTRI GIOCATORI------------
+  for (let j = 0; j < myOtherPlayers.length; j++) {
+    myOtherPlayers[j].display();
+  }
+
+
 
   push();
 
@@ -329,27 +339,38 @@ if (!startCalibration) {
 
   text(totalscore, width / 2, 100);
 
-  text(windowHeight, width/2, 450);
+  text(windowHeight, width / 2, 450);
 
-  text(displayHeight, width/2, 500);
-
-
-  ellipse(widthY, yPlayer - 25, 20, 20);
+  text(displayHeight, width / 2, 500);
 
   pop();
 
+  push();
+  fill("yellow");
+  noStroke()
 
-  //---------MOSTRA ALTRI GIOCATORI------------
-  for (let j = 0; j < myOtherPlayers.length; j++) {
-    myOtherPlayers[j].display();
-  }
+  triangle(widthY - 10, yPlayer, widthY, yPlayer - 30, widthY + 10, yPlayer);
+
+  pop();
+
+  push();
+  fill("white");
+  noStroke();
+
+  triangle(widthY - 5, yPlayer, widthY, yPlayer + random(1, 15), widthY + 5, yPlayer);
+
+  pop();
+
+  // ellipse(widthY, yPlayer - 40, 20, 20);
+
+
 
 
   //--------PARAMETRI PASSATI DEL GIOCATORE AL SERVER----------
 
   yRatio = yPlayer / windowHeight * 100000;
   yRatio = round(yRatio);
-  yRatio= yRatio/100000;
+  yRatio = yRatio / 100000;
 
 
   let info_p = {
@@ -427,11 +448,27 @@ class OtherPlayer {
   }
 
   display() {
-    push();
-    fill(127);
-    stroke(0);
+    // push();
+    // fill(127);
+    // stroke(0);
+    //
+    // ellipse(this.x, this.h - 25, 20, 20);
+    // pop();
 
-    ellipse(this.x, this.h - 25, 20, 20);
+    push();
+    fill(150);
+    noStroke()
+
+    triangle(this.x - 10, this.h, this.x, this.h - 30, this.x + 10, this.h);
+
+    pop();
+
+    push();
+    fill(200);
+    noStroke();
+
+    triangle(this.x - 5, this.h, this.x, this.h + random(1, 15), this.x + 5, this.h);
+
     pop();
   }
 
@@ -451,7 +488,7 @@ class StarsOne {
     this.r = 1;
     this.x = random(0, width);
     this.y = random(0, height);
-    // console.log("y " + this.y);
+
   }
 
   display() {
@@ -461,7 +498,6 @@ class StarsOne {
     fill(255);
     ellipse(this.x, this.y, this.r, this.r);
     pop();
-    // console.log("y display" + this.y);
 
   }
 
@@ -471,13 +507,10 @@ class StarsOne {
     {
       this.y = 0; //reset to the top of the screen
       this.x = random(0, width);
-      // console.log("y 2 " + this.y);
     } else {
-      this.y += vel / 2000;
-      // console.log("y 3 " + this.y);
+      this.y += vel / 3000;
     }
   }
-
 }
 
 
@@ -491,7 +524,7 @@ class StarsTwo {
     this.r = 2;
     this.x = random(0, width);
     this.y = random(0, height);
-    // console.log("y " + this.y);
+
   }
 
   display() {
@@ -501,7 +534,6 @@ class StarsTwo {
     fill(255);
     ellipse(this.x, this.y, this.r, this.r);
     pop();
-    // console.log("y display" + this.y);
 
   }
 
@@ -511,13 +543,11 @@ class StarsTwo {
     {
       this.y = 0; //reset to the top of the screen
       this.x = random(0, width);
-      // console.log("y 2 " + this.y);
+
     } else {
       this.y += vel / 1000;
-      // console.log("y 3 " + this.y);
     }
   }
-
 }
 
 
@@ -530,7 +560,6 @@ class StarsThree {
     this.r = 3;
     this.x = random(0, width);
     this.y = random(0, height);
-    // console.log("y " + this.y);
   }
 
   display() {
@@ -540,7 +569,6 @@ class StarsThree {
     fill(255);
     ellipse(this.x, this.y, this.r, this.r);
     pop();
-    // console.log("y display" + this.y);
 
   }
 
@@ -552,9 +580,7 @@ class StarsThree {
       this.x = random(0, width);
       // console.log("y 2 " + this.y);
     } else {
-      this.y += vel / 500;
-      // console.log("y 3 " + this.y);
+      this.y += vel / 400;
     }
   }
-
 }
