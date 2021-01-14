@@ -12,6 +12,8 @@ let otherH_players;
 
 let yRatio;
 
+let malus = false;
+
 
 let myOtherPlayers = [];
 
@@ -133,10 +135,10 @@ let obstacles = [];
 
 socket.on('obstacle_x', createObstacle);
 
-function createObstacle(obstacleXServer){
+function createObstacle(obstacleXServer) {
 
-  obstacleX = obstacleXServer/1000*windowWidth;
-  let newObstacle = new Obstacle(obstacleX);
+  obstacleX = obstacleXServer / 1000 * windowWidth;
+  let newObstacle = new Obstacles(obstacleX);
   obstacles.push(newObstacle);
 
   // console.log("obstacleXServer " + obstacleXServer);
@@ -148,13 +150,13 @@ function createObstacle(obstacleXServer){
 let yPlayer;
 
 let starsOne = [];
-let numStarsOne = 200; //quante stelle 1 creare
+let numStarsOne = 60; //quante stelle 1 creare
 
 let starsTwo = [];
-let numStarsTwo = 80; //quante stelle 2 creare
+let numStarsTwo = 20; //quante stelle 2 creare
 
 let starsThree = [];
-let numStarsThree = 30; //quante stelle 3 creare
+let numStarsThree = 15; //quante stelle 3 creare
 
 
 function setup() {
@@ -309,7 +311,8 @@ function draw() {
       timerBonus++;
     }
 
-    if (checkBonus === myOtherPlayers.length && checkBonus != 0 && timerBonus === 120) {
+    //aggiunto che il bonus si prende solo se si sta più di 200 pixel più in alto dal margine in basso della finestra
+    if (checkBonus === myOtherPlayers.length && checkBonus != 0 && timerBonus === 120 && yPlayer < (height - 200)) {
       bonus = true;
       socket.emit('bonus', bonus);
       console.log("dentro condizioni giuste bonus");
@@ -317,14 +320,13 @@ function draw() {
     }
 
     if (bonusServer) {
-      console.log("dentro bonus server if");
 
       if (bonusDuration < 50) {
         background(0, 0, 0, 50);
         vel += 10000;
-      } else if(bonusDuration < 60 && bonusDuration > 50){
+      } else if (bonusDuration < 60 && bonusDuration > 50) {
 
-        background(0, 0, 0, 50);
+        background(0, 0, 0, 10);
         vel += 5000;
 
       } else {
@@ -338,6 +340,7 @@ function draw() {
     }
 
   }
+
 
   //----------DISPLAY STELLE SFONDO PARALLASSE--------
 
@@ -363,24 +366,49 @@ function draw() {
 
 
 
-//-------------OSTACOLI-------------
+  //-------------OSTACOLI-------------
+
+  for (let l = 0; l < obstacles.length; l++) {
+
+    obstacles[l].display();
+    obstacles[l].move();
+
+    if (obstacles[l].y === (height + 15)) {
+      obstacles[l].splice(l, 1);
+    }
 
 
 
-for (let l = 0; l < obstacles.length; l++) {
-
-  obstacles[l].display();
-  obstacles[l].move();
-
-  if(obstacles[l].y===(height+15)){
-    obstacles[l].splice(l,1);
   }
 
 
+    //---------------COLLISIONI---------------
 
-}
+    bx = widthY;
+    by = yPlayer - 10;
+
+    for (let t = 0; t < obstacles.length; t++) {
+
+      d = dist(bx, by, obstacles[t].x, obstacles[t].y);
+
+      if(obstacles[t].y > (height+15)){ //se l'ostacolo va sotto lo schermo viene tolto dall'array
+        obstacles.splice(t, 1);
+        }
+
+      if (d < 25 && !bonusServer) {
+        collision = true;
+        obstacles.splice(t, 1);
+      }
 
 
+    }
+
+
+    if (collision) {
+      yPlayer = height;
+      volHighscore = 0;
+      varTimeout = setTimeout(resetCollision, 3000);
+    }
 
 
 
@@ -401,9 +429,8 @@ for (let l = 0; l < obstacles.length; l++) {
 
   text(totalscore, width / 2, 100);
 
-  text(windowHeight, width / 2, 450);
-
-  text(displayHeight, width / 2, 500);
+  // text(windowHeight, width / 2, 450);
+  // text(displayHeight, width / 2, 500);
 
   pop();
 
@@ -423,39 +450,6 @@ for (let l = 0; l < obstacles.length; l++) {
 
   pop();
 
-  // ellipse(widthY, yPlayer - 40, 20, 20);
-
-
-
-  //------------COLLISIONI-------------
-
-  bx = widthY;
-  by = yPlayer - 10;
-
-  for(let t = 0; t < obstacles.length; t++){
-
-    d = dist (bx, by, obstacles[t].x,obstacles[t].y);
-
-    if(d < 20){
-
-      collision = true;
-
-      // obstacles[t].splice(t,1);
-
-    }
-
-  }
-
-
-if(collision){
-
-  console.log("collisione");
-
-  // yPlayer += 200;
-
-  collision = false;
-
-}
 
 
   //--------PARAMETRI PASSATI DEL GIOCATORE AL SERVER----------
@@ -475,7 +469,6 @@ if(collision){
   }
 
   socket.emit('micvolume', info_p);
-
 
 
   //------------CALIBRAZIONE MICROFONO----------------
@@ -506,10 +499,11 @@ if(collision){
   }
 
 
+}
 
 
-
-
+function resetCollision() {
+  collision = false;
 }
 
 
@@ -567,6 +561,37 @@ class OtherPlayer {
   }
 
 }
+
+//---------------CLASSE OSTACOLI--------------
+
+class Obstacles {
+
+  constructor(obstacleX) {
+
+    this.r = 30;
+    this.x = obstacleX;
+    this.y = -15;
+
+  }
+
+  display() {
+
+    push();
+    noStroke();
+    fill(255);
+    ellipseMode(CENTER);
+    ellipse(this.x, this.y, this.r);
+    pop();
+
+  }
+
+  move() {
+    this.y += vel / 100;
+  }
+
+}
+
+
 
 
 //-----------CLASSE PER STELLE SFONDO PARALLASSE----------
@@ -677,14 +702,13 @@ class StarsThree {
 
 
 
-class Obstacle {
+class Planets {
 
-  constructor(obstacleX) {
+  constructor() {
 
-    this.r = 30;
-    this.x = obstacleX;
-    this.y = -15;
-
+    this.r = 3;
+    this.x = random(0, width);
+    this.y = random(0, height);
   }
 
   display() {
@@ -692,21 +716,20 @@ class Obstacle {
     push();
     noStroke();
     fill(255);
-    ellipseMode(CENTER);
-    ellipse(this.x, this.y, this.r);
+    ellipse(this.x, this.y, this.r, this.r);
     pop();
 
   }
 
+  move() {
 
-    move() {
-
-      if (this.y > height+15) //if the star goes below the screen
-      {
-        // autodistruzione
-      } else {
-        this.y += vel/100;
-      }
+    if (this.y > height) //if the star goes below the screen
+    {
+      this.y = 0; //reset to the top of the screen
+      this.x = random(0, width);
+      // console.log("y 2 " + this.y);
+    } else {
+      this.y += vel / 400;
     }
-
+  }
 }
