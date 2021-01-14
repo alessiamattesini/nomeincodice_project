@@ -93,7 +93,6 @@ function others_micvolume(data) {
       myOtherPlayers[i].h = otherH_players;
       myOtherPlayers[i].x = data.x;
     }
-
   }
 
 }
@@ -141,8 +140,6 @@ function createObstacle(obstacleXServer) {
   let newObstacle = new Obstacles(obstacleX);
   obstacles.push(newObstacle);
 
-  // console.log("obstacleXServer " + obstacleXServer);
-
 }
 
 
@@ -153,10 +150,12 @@ let starsOne = [];
 let numStarsOne = 60; //quante stelle 1 creare
 
 let starsTwo = [];
-let numStarsTwo = 20; //quante stelle 2 creare
+let numStarsTwo = 30; //quante stelle 2 creare
 
 let starsThree = [];
 let numStarsThree = 15; //quante stelle 3 creare
+
+let planet;
 
 
 function setup() {
@@ -214,6 +213,8 @@ function setup() {
   }
 
 
+  planet = new Planets();
+
 
 }
 
@@ -237,6 +238,8 @@ let bx;
 let by;
 let collision = false;
 let d;
+let collisionTimeout;
+
 
 
 function draw() {
@@ -244,8 +247,6 @@ function draw() {
 
   // Get the overall volume (between 0 and 1.0)
   let vol = mic.getLevel();
-
-  // console.log("questo max vol : " + maxVol);
 
   let h = map(vol, 0, maxVol, height, 0);
 
@@ -357,6 +358,7 @@ function draw() {
       starsTwo[q].move();
     }
 
+
     for (let r = 0; r < numStarsThree; r++) {
       starsThree[r].display();
       starsThree[r].move();
@@ -364,51 +366,43 @@ function draw() {
 
   }
 
+  //-------------------DISPLAY PIANETA-------------
+
+  planet.display();
+  planet.move();
 
 
-  //-------------OSTACOLI-------------
+  //---------------OSTACOLI E COLLISIONI---------------
 
-  for (let l = 0; l < obstacles.length; l++) {
+  bx = widthY;
+  by = yPlayer - 10;
 
-    obstacles[l].display();
-    obstacles[l].move();
+  for (let t = 0; t < obstacles.length; t++) {
 
-    if (obstacles[l].y === (height + 15)) {
-      obstacles[l].splice(l, 1);
+    obstacles[t].display();
+    obstacles[t].move();
+
+    d = dist(bx, by, obstacles[t].x, obstacles[t].y);
+
+    if (obstacles[t].y > (height + 15)) { //se l'ostacolo va sotto lo schermo viene tolto dall'array
+      obstacles.splice(t, 1);
     }
 
-
-
+    if (d < 25 && !bonusServer) {
+      console.log("dentro collision 1");
+      collision = true;
+      obstacles.splice(t, 1);
+    }
   }
 
 
-    //---------------COLLISIONI---------------
 
-    bx = widthY;
-    by = yPlayer - 10;
-
-    for (let t = 0; t < obstacles.length; t++) {
-
-      d = dist(bx, by, obstacles[t].x, obstacles[t].y);
-
-      if(obstacles[t].y > (height+15)){ //se l'ostacolo va sotto lo schermo viene tolto dall'array
-        obstacles.splice(t, 1);
-        }
-
-      if (d < 25 && !bonusServer) {
-        collision = true;
-        obstacles.splice(t, 1);
-      }
-
-
-    }
-
-
-    if (collision) {
-      yPlayer = height;
-      volHighscore = 0;
-      varTimeout = setTimeout(resetCollision, 3000);
-    }
+  if (collision) {
+    console.log("dentro collision 2");
+    yPlayer = height;
+    volHighscore = 0;
+    collisionTimeout = setTimeout(resetCollision, 3000);
+  }
 
 
 
@@ -504,8 +498,8 @@ function draw() {
 
 function resetCollision() {
   collision = false;
+  clearTimeout(collisionTimeout);
 }
-
 
 
 function calibrationMicrophone() {
@@ -532,12 +526,6 @@ class OtherPlayer {
   }
 
   display() {
-    // push();
-    // fill(127);
-    // stroke(0);
-    //
-    // ellipse(this.x, this.h - 25, 20, 20);
-    // pop();
 
     push();
     fill(150);
@@ -610,7 +598,7 @@ class StarsOne {
 
     push();
     noStroke();
-    fill(255);
+    fill(255, 255, 255, random(50, 255));
     ellipse(this.x, this.y, this.r, this.r);
     pop();
 
@@ -646,7 +634,7 @@ class StarsTwo {
 
     push();
     noStroke();
-    fill(255);
+    fill(255, 255, 255, random(130, 255));
     ellipse(this.x, this.y, this.r, this.r);
     pop();
 
@@ -654,7 +642,7 @@ class StarsTwo {
 
   move() {
 
-    if (this.y > height) //if the star goes below the screen
+    if (this.y > height + 1) //if the star goes below the screen
     {
       this.y = 0; //reset to the top of the screen
       this.x = random(0, width);
@@ -672,7 +660,7 @@ class StarsThree {
 
   constructor() {
 
-    this.r = 3;
+    this.r = 4;
     this.x = random(0, width);
     this.y = random(0, height);
   }
@@ -681,7 +669,7 @@ class StarsThree {
 
     push();
     noStroke();
-    fill(255);
+    fill(255, 255, 255, random(130, 255));
     ellipse(this.x, this.y, this.r, this.r);
     pop();
 
@@ -689,7 +677,7 @@ class StarsThree {
 
   move() {
 
-    if (this.y > height) //if the star goes below the screen
+    if (this.y > height + 2) //if the star goes below the screen
     {
       this.y = 0; //reset to the top of the screen
       this.x = random(0, width);
@@ -706,8 +694,8 @@ class Planets {
 
   constructor() {
 
-    this.r = 3;
-    this.x = random(0, width);
+    this.r = 300;
+    this.x = random(-2000, width + 2000);
     this.y = random(0, height);
   }
 
@@ -715,21 +703,20 @@ class Planets {
 
     push();
     noStroke();
-    fill(255);
-    ellipse(this.x, this.y, this.r, this.r);
+    fill(113, 189, 192);
+    ellipse(this.x, this.y, this.r);
     pop();
 
   }
 
   move() {
 
-    if (this.y > height) //if the star goes below the screen
+    if (this.y > height + 150) //if the star goes below the screen
     {
-      this.y = 0; //reset to the top of the screen
-      this.x = random(0, width);
-      // console.log("y 2 " + this.y);
+      this.y = -150; //reset to the top of the screen
+      this.x = random(-2000, width + 2000);
     } else {
-      this.y += vel / 400;
+      this.y += vel / 200;
     }
   }
 }
